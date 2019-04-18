@@ -1,0 +1,52 @@
+{
+  "name": "gridnode",
+  "version": "1.0.0",
+  "description": "gridNode",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nitisakc/gridNode.git"
+  },
+  "author": "Nitisak Chancham",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nitisakc/gridNode/issues"
+  },
+  "homepage": "https://github.com/nitisakc/gridNode#readme",
+  "dependencies": {
+    "argparse": "^1.0.10",
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.8.15",
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
+    "debug": "^4.1.0",
+    "express": "^4.16.4",
+    "johnny-five": "^1.0.0",
+    "morgan": "^1.9.1",
+    "node-schedule": "^1.3.0",
+    "request": "^2.88.0",
+    "rpio": "^0.9.23",
+    "socket.io": "^2.1.1"
+  },
+  "host": "",
+  "port": 3001,
+  "carNumber": 159,
+  "mapid": 2,
+  "carType": "HANDLIFT1",
+  "var": {
+    "dir": 0,
+    "spd": 0,
+    "currDeg": 255,
+    "selDeg": 90,
+    "pidon": false,
+    "pidval": 255,
+    "ar": [],
+    "liftpos": 0,
+    "liftup": false,
+    "safety": null,
+    "pallet": 0
+  }
+}
