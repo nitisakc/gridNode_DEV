@@ -34,7 +34,9 @@ app.set('port', port);
 var server = http.createServer(app);
 server.listen(port);
 
+global.syss = pjson.syss;
 global.var = pjson.var;
+const syss = require('./syss');
 const arduino = require('./arduino');
 
 global.io = require('socket.io').listen(server);

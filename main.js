@@ -1,5 +1,6 @@
 let app = require('./app');
-let term = require('terminal-kit').terminal;
+
+require('./screen');
 
 // term.moveTo(10,10);
 // term( 'Hello world!\n' );
