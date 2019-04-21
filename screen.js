@@ -7,13 +7,13 @@ let screen = blessed.screen();
 let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
 
 // table status
-  let table =  grid.set(0, 0, 5, 3, contrib.table, { 
+  let table =  grid.set(0, 0, 5, 4, contrib.table, { 
     keys: false,
     fg: 'white',
     label: 'Arduino val.',
     interactive: false,
     columnSpacing: 1,
-    columnWidth: [15, 10]
+    columnWidth: [17, 10]
   });
   let varName = ['dir', 'spd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'pallet'];
   function generateTable() {
@@ -34,7 +34,7 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
   setInterval(generateTable, 100);
 
 //table ar
-  let tableAr =  grid.set(0, 3, 5, 6, contrib.table, { 
+  let tableAr =  grid.set(0, 4, 5, 6, contrib.table, { 
     keys: false,
     fg: 'white',
     label: 'AR Vision',
@@ -95,6 +95,9 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 });
 
 screen.on('resize', function() {
-  grid.emit('attach');
-  box.emit('attach');
+  // grid.emit('attach');
+  table.emit('attach');
+  tableAr.emit('attach');
+  netstat.emit('attach');
+  lcdDiff.emit('attach');
 });

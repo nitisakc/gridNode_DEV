@@ -39,10 +39,24 @@ board.on("ready", ()=> {
 	liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
-
     if(global.var.liftup == 1){ relayLiftdown.off(); relayLiftup.on(); }
     else if(global.var.liftup == 2){ relayLiftup.off(); relayLiftdown.on(); }
     else{ relayLiftdown.off(); relayLiftup.off(); }
+
+    if(global.var.en){
+      relayEnable.on();
+      if(global.var.dirfw){
+        relayBackward.off();
+        relayForward.on();
+      }else{
+        relayForward.off(); 
+        relayBackward.on();
+      }
+    }else{
+      relayEnable.off();
+      relayForward.off(); 
+      relayBackward.off();
+    } 
 	});
 });
 
