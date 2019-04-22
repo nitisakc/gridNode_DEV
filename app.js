@@ -49,6 +49,11 @@ global.io.on('connection', function(socket) {
 		global.var.pidval = msgs; 
 	    global.io.emit('pidval', msgs);
 	});
+
+	socket.on('selDeg',  (msgs)=> { 
+		global.var.selDeg = msgs; 
+	    // global.io.emit('pidval', msgs);
+	});
 });
 
 module.exports = app;

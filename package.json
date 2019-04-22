@@ -57,6 +57,7 @@
     "liftpos": 0,
     "liftup": 0,
     "safety": 0,
-    "pallet": 0
+    "pallet": 0,
+    "beep": false
   }
 }

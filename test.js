@@ -1,54 +1,25 @@
-var blessed = require('blessed')
-     , contrib = require('blessed-contrib');
+const five = require("johnny-five");
 
-var screen = blessed.screen()
-var lcd = contrib.lcd({
-  label: 'Test',
-  elements: 4
-});
+const board = new five.Board({ port: 'tty.usbmodem1421' });
 
-screen.append(lcd);
+board.on("ready", ()=> {
+  let relay = {
+    enable: new five.Relay({ pin: "A9", type: "NC" }),
+    forward: new five.Relay({ pin: "A15", type: "NC" }),
+    backward: new five.Relay({ pin: "A14", type: "NC" }),
+    beep: new five.Relay({ pin: "A10", type: "NC" }),
+    liftup: new five.Relay({ pin: "A12", type: "NC" }),
+    liftdown: new five.Relay({ pin: "A11", type: "NC" }),
+    brake: new five.Relay({ pin: "A13", type: "NC" })
+  };
 
-setInterval(function(){
-  var colors = ['green','magenta','cyan','red','blue'];
-  var text = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
-  var value = Math.round(Math.random() * 1000);
-  lcd.setDisplay(value + text[value%12]);
-  lcd.setOptions({
-    color: colors[value%5],
-    elementPadding: 5
+  // var motor = new five.Motor(9);
+  // motor.start(180);
+
+  board.loop(40, ()=> {
+    relay.brake.toggle();
+    relay.forward.toggle();
   });
-  screen.render();
-}, 1000);
 
-screen.key(['g'], function(ch, key) {
-  lcd.increaseWidth();
-  screen.render();
 });
-screen.key(['h'], function(ch, key) {
-  lcd.decreaseWidth();
-  screen.render();
-});
-screen.key(['t'], function(ch, key) {
-  lcd.increaseInterval();
-  screen.render();
-});
-screen.key(['y'], function(ch, key) {
-  lcd.decreaseInterval();
-  screen.render();
-});
-screen.key(['b'], function(ch, key) {
-  lcd.increaseStroke();
-  screen.render();
-});
-screen.key(['n'], function(ch, key) {
-  lcd.decreaseStroke();
-  screen.render();
-});
-
-screen.key(['escape', 'q', 'C-c'], function(ch, key) {
-  return process.exit(0);
-});
-
-screen.render()

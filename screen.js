@@ -15,12 +15,13 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
     columnSpacing: 1,
     columnWidth: [17, 10]
   });
-  let varName = ['dir', 'spd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'pallet'];
+  let varName = ['en','dirfw', 'spd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'pallet'];
   function generateTable() {
      let data = [];
      for (let i = 0; i < varName.length; i++) {
        let row = [];      
        row.push(varName[i]);
+       // row.push(20);
        row.push(global.var[varName[i]]);
 
        data.push(row);
@@ -29,9 +30,11 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
      table.setData({ headers: ['Names', 'Values'], data: data });
 
      screen.render();
+
+     global.io.emit('var', global.var);
   }
   generateTable();
-  setInterval(generateTable, 100);
+  setInterval(generateTable, 200);
 
 //table ar
   let tableAr =  grid.set(0, 4, 5, 6, contrib.table, { 
@@ -95,7 +98,7 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 });
 
 screen.on('resize', function() {
-  // grid.emit('attach');
+  grid.emit('attach');
   table.emit('attach');
   tableAr.emit('attach');
   netstat.emit('attach');

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"></li>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/roundSlider/1.3.3/roundslider.min.css">
+	<link rel="stylesheet" type="text/css" href="css/remote.css"></li>
+	<style type="text/css" id="css"></style>
+</head>
+<body ng-app="APP" ng-controller="mainCtrl">
+	<div class="row">
+		<div class="col col-md-12 col-xs-12">
+			<div id="slider1"></div>
+			<div id="slider2"></div>	
+		</div>
+	</div>
+	<script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/angular.min.js"></script>
+	<script type="text/javascript" src="js/socket.io.js" ></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/roundSlider/1.3.3/roundslider.min.js"></script>
+	<script type="text/javascript">
+		let app = angular.module('APP', []);
+		app.controller('mainCtrl', function($scope, $http) {
+			$(document).ready(function() {
+				let selDeg = 90;
+				$("#slider1").roundSlider({
+				    circleShape: "half-top",
+				    min: 0,
+				    max: 180,
+				    value: 90,
+				    startAngle: 0,
+				    editableTooltip: false,
+				    radius: $(window).width() / 2 * 0.9,
+				    width: 40,
+				    handleShape: "dot",
+				    handleSize: "60,20",
+				    animation: false,
+				    drag: (e)=>{
+				    	selDeg = e.value;
+				    	socket.emit('selDeg', e.value);
+				    }
+				});
+
+				$("#slider2").roundSlider({
+				    min: 0,
+				    max: 180,
+				    value: 90,
+				    showTooltip: false,
+				    radius: $(window).width() / 2 * 0.9,
+				    width: 40,
+				    handleSize: 0,
+				    handleShape: "square",
+				    circleShape: "half-top",
+				    animation: true
+				});
+
+				$('#css').append('#slider2 .rs-handle:after{ width:' + $(window).width() / 2 * 0.9 +'px; }');
+
+				var socket = io.connect('/');
+			    if(socket){
+			        socket.on('conn', function (msg) {
+			            console.log("My id: " + msg);
+			        });
+
+			        socket.on('var', function (msg) {
+			        	// selDeg = msg.selDeg;
+			        	$("#slider2").roundSlider("setValue", msg.currDeg);
+			        	$("#slider1").roundSlider("setValue", msg.selDeg);
+			        });
+			    }
+			});
+		});
+	</script>
+</body>
+</html>

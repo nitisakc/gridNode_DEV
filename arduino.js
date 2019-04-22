@@ -1,18 +1,20 @@
 const five = require("johnny-five");
 const d3 = require("d3-scale");
 const calc = require('./utils/calc');
-const board = new five.Board({ repl: false, debug: false });
+const board = new five.Board({ repl: false, debug: true });
 
 let calcPoten = d3.scaleLinear().domain([150, 855]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-10, 10]).clamp(true);
 
 board.on("ready", ()=> {
-	let relayEnable 	= new five.Relay({ pin: "A9"  });
-	let relayForward 	= new five.Relay({ pin: "A15" });
-	let relayBackward 	= new five.Relay({ pin: "A14" });
-	let relayBeep		= new five.Relay({ pin: "A10" });
-	let relayLiftup		= new five.Relay({ pin: "A12" });
-	let relayLiftdown	= new five.Relay({ pin: "A11" });
+  let relay = {
+    enable: new five.Relay({ pin: "A9", type: "NC" }),
+    forward: new five.Relay({ pin: "A15", type: "NC" }),
+    backward: new five.Relay({ pin: "A14", type: "NC" }),
+    beep: new five.Relay({ pin: "A10", type: "NC" }),
+    liftup: new five.Relay({ pin: "A12", type: "NC" }),
+    liftdown: new five.Relay({ pin: "A11", type: "NC" })
+  };
 
 	let poten 			= new five.Sensor({ pin: "A7", freq: 120 });
 	let liftPosUp 		= new five.Button({ pin: 31, isPullup: true });
@@ -39,26 +41,44 @@ board.on("ready", ()=> {
 	liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
-    if(global.var.liftup == 1){ relayLiftdown.off(); relayLiftup.on(); }
-    else if(global.var.liftup == 2){ relayLiftup.off(); relayLiftdown.on(); }
-    else{ relayLiftdown.off(); relayLiftup.off(); }
+    if(global.var.liftup == 1){ relay.liftdown.off(); relay.liftup.on(); }
+    else if(global.var.liftup == 2){ relay.liftup.off(); relay.liftdown.on(); }
+    else{ relay.liftdown.off(); relay.liftup.off(); }
 
     if(global.var.en){
-      relayEnable.on();
+      relay.enable.on();
       if(global.var.dirfw){
-        relayBackward.off();
-        relayForward.on();
+        relay.backward.off();
+        relay.forward.on();
       }else{
-        relayForward.off(); 
-        relayBackward.on();
+        relay.forward.off(); 
+        relay.backward.on();
       }
     }else{
-      relayEnable.off();
-      relayForward.off(); 
-      relayBackward.off();
+      relay.enable.off();
+      relay.forward.off(); 
+      relay.backward.off();
     } 
+
+    if(global.var.liftup == 1){
+      relay.liftdown.off();
+      relay.liftup.on();
+    }else if(global.var.liftup == 2){
+      relay.liftup.off();
+      relay.liftdown.on();
+    }else{
+      relay.liftup.off();
+      relay.liftdown.off();
+    }
+
+    if(global.var.beep){
+      global.var.beep = false;
+      relay.beep.on();
+      setTimeout(()=>{
+        relay.beep.off();
+      },200);
+    }
 	});
 });
-
 
 module.exports = board;
