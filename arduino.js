@@ -6,8 +6,14 @@ const board = new five.Board({ repl: false, debug: true });
 let calcPoten = d3.scaleLinear().domain([150, 855]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-10, 10]).clamp(true);
 
+let relay, poten, liftPosUp, liftPosDown;
+
+board.on("exit", ()=> {
+  console.log('exit');
+});
+
 board.on("ready", ()=> {
-  let relay = {
+  relay = {
     enable: new five.Relay({ pin: "A9", type: "NC" }),
     forward: new five.Relay({ pin: "A15", type: "NC" }),
     backward: new five.Relay({ pin: "A14", type: "NC" }),
@@ -16,9 +22,9 @@ board.on("ready", ()=> {
     liftdown: new five.Relay({ pin: "A11", type: "NC" })
   };
 
-	let poten 			= new five.Sensor({ pin: "A7", freq: 120 });
-	let liftPosUp 		= new five.Button({ pin: 31, isPullup: true });
-	let liftPosDown 	= new five.Button({ pin: 33, isPullup: true });
+	poten 			= new five.Sensor({ pin: "A7", freq: 120 });
+	liftPosUp 		= new five.Button({ pin: 31, isPullup: true });
+	liftPosDown 	= new five.Button({ pin: 33, isPullup: true });
 
   poten.on("data", function() {
     global.var.currDeg = calcPoten(this.value).toFixed(0);
@@ -27,49 +33,31 @@ board.on("ready", ()=> {
   });
 
 	liftPosUp.on("down", 	()=> { 
-    console.info('liftPosUp down');
     global.var.liftpos = 2; 
     global.var.liftup = 0; 
   });
 	liftPosUp.on("up", 		()=> { global.var.liftpos = 0; });
 
 	liftPosDown.on("down", 	()=> { 
-    console.info('liftPosDown down');
     global.var.liftpos = 1; 
     global.var.liftup = 0; 
   });
 	liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
-    if(global.var.liftup == 1){ relay.liftdown.off(); relay.liftup.on(); }
-    else if(global.var.liftup == 2){ relay.liftup.off(); relay.liftdown.on(); }
-    else{ relay.liftdown.off(); relay.liftup.off(); }
+    speed.accel(); //check speed change
+    console.log(new Date());
 
     if(global.var.en){
       relay.enable.on();
-      if(global.var.dirfw){
-        relay.backward.off();
-        relay.forward.on();
-      }else{
-        relay.forward.off(); 
-        relay.backward.on();
-      }
+      move.dir(global.var.dirfw);
     }else{
-      relay.enable.off();
-      relay.forward.off(); 
-      relay.backward.off();
+      move.stop();
     } 
 
-    if(global.var.liftup == 1){
-      relay.liftdown.off();
-      relay.liftup.on();
-    }else if(global.var.liftup == 2){
-      relay.liftup.off();
-      relay.liftdown.on();
-    }else{
-      relay.liftup.off();
-      relay.liftdown.off();
-    }
+    if(global.var.liftup == 1){ lift.up(); }
+    else if(global.var.liftup == 2){ lift.down(); }
+    else{ lift.stop(); }
 
     if(global.var.beep){
       global.var.beep = false;
@@ -79,6 +67,55 @@ board.on("ready", ()=> {
       },200);
     }
 	});
+
+  board.on("exit", ()=> {
+    console.log('exit');
+  });
 });
+
+let move = {
+  dir: (fw)=>{
+    if(fw){
+      relay.backward.off();
+      relay.forward.on();
+    }else{
+      relay.forward.off(); 
+      relay.backward.on();
+    }
+  },
+  stop: ()=>{
+    relay.enable.off();
+    relay.forward.off(); 
+    relay.backward.off();
+    global.var.currSpd = 0;
+    global.var.setSpd = 0;
+  }
+}
+
+let speed = {
+  accel: ()=>{
+    let s = global.var.setSpd - global.var.currSpd;
+    if(s > 0){
+      global.var.currSpd++;
+    }else if(s < 0){
+      global.var.currSpd--;
+    }
+  }
+}
+
+let lift = {
+  up: ()=>{
+    relay.liftdown.off();
+    relay.liftup.on();
+  },
+  down: ()=>{
+    relay.liftup.off();
+    relay.liftdown.on();
+  },
+  stop: ()=>{
+    relay.liftup.off();
+    relay.liftdown.off();
+  }
+}
 
 module.exports = board;

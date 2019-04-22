@@ -1,6 +1,7 @@
 let blessed = require('blessed')
      , contrib = require('blessed-contrib');
 const calc = require('./utils/calc');
+const _ = require('underscore');
 
 let screen = blessed.screen();
 
@@ -15,7 +16,7 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
     columnSpacing: 1,
     columnWidth: [17, 10]
   });
-  let varName = ['en','dirfw', 'spd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'pallet'];
+  let varName = ['en','dirfw', 'currSpd', 'setSpd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'pallet'];
   function generateTable() {
      let data = [];
      for (let i = 0; i < varName.length; i++) {
@@ -98,7 +99,7 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 });
 
 screen.on('resize', function() {
-  grid.emit('attach');
+  // grid.emit('attach');
   table.emit('attach');
   tableAr.emit('attach');
   netstat.emit('attach');
