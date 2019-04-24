@@ -1,13 +1,14 @@
 const five = require("johnny-five");
 const d3 = require("d3-scale");
 const calc = require('./utils/calc');
-const ardu = require("./H-Bridge");
+const eight = require("./north-eight.js");
 const board = new five.Board({ repl: false, debug: true });
 
 let calcPoten = d3.scaleLinear().domain([150, 855]).range([0, 180]).clamp(true);
-let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-10, 10]).clamp(true);
+let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
 
 let relay, poten, liftPosUp, liftPosDown, motors, lamp;
+let trunMotor = new BTS7960(45, 44, 46);
 
 board.on("exit", ()=> {
   console.log('exit');
@@ -15,14 +16,12 @@ board.on("exit", ()=> {
 
 board.on("ready", ()=> {
   relay = {
-    enable: new ardu.Relay({ pin: 22 }),
-    forward: new ardu.Relay({ pin: 23 }),
-    backward: new ardu.Relay({ pin: 24 }),
-    beep: new ardu.Relay({ pin: 25 }),
-    liftup: new ardu.Relay({ pin: 26 }),
-    liftdown: new ardu.Relay({ pin: 27 }),
-    xx: new ardu.Relay({ pin: 28 }),
-    cc: new ardu.Relay({ pin: 29 })
+    enable: new eight.Relay({ pin: 22 }),
+    forward: new eight.Relay({ pin: 23 }),
+    backward: new eight.Relay({ pin: 24 }),
+    beep: new eight.Relay({ pin: 25 }),
+    liftup: new eight.Relay({ pin: 26 }),
+    liftdown: new eight.Relay({ pin: 27 })
   };
 
   lamp = {
@@ -32,13 +31,8 @@ board.on("ready", ()=> {
     b: new five.Led({ pin: 37 }),
     w: new five.Led({ pin: 38 })
   };
-  lamp.r.blink();
-  lamp.o.blink();
-  lamp.g.blink();
-  lamp.b.blink();
-  lamp.w.blink();
 
-	poten 			= new five.Sensor({ pin: "A5", freq: 120 });
+	poten 			  = new five.Sensor({ pin: "A5", freq: 120 });
 	liftPosUp 		= new five.Button({ pin: 6, isPullup: true });
 	liftPosDown 	= new five.Button({ pin: 7, isPullup: true });
 
@@ -47,11 +41,11 @@ board.on("ready", ()=> {
     let diff = global.var.selDeg - global.var.currDeg;
     global.var.diffDeg = (diff).toFixed(0);//calcDiff(diff).toFixed(0);
     if(global.var.diffDeg < 0){
-      // motors.forward(180);
+      trunMotor.start(180);
     }else if(global.var.diffDeg > 0){
-      // motors.reverse(180);
+      trunMotor.start(180);
     }else{
-      // motors.stop();
+      trunMotor.stop();
     }
   });
 
@@ -67,19 +61,9 @@ board.on("ready", ()=> {
   });
 	liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
-	board.loop(40, ()=> {
+	board.loop(50, ()=> {
     speed.accel();
-
-    lift.process();
 	});
-
-  setTimeout(()=>{
-    global.var.liftup = 2;
-    setTimeout(()=>{
-      global.var.liftpos = 2; 
-      global.var.liftup = 0; 
-    },10000);
-  }, 3000);
 
   board.on("exit", ()=> {
     console.log('exit');
@@ -117,6 +101,9 @@ let speed = {
     }else if(s < 0){
       global.var.currSpd--;
     }
+  },
+  set: (val)=>{
+    global.var.setSpd = val;
   }
 }
 
@@ -126,13 +113,27 @@ let lift = {
     else if(global.var.liftup == 2){ lift.down(); }
     else{ lift.stop(); }
   },
-  up: ()=>{
+  up: (callback)=>{
     relay.liftdown.off();
     relay.liftup.on();
+    let inv = setInterval(()=>{
+      if(global.var.liftpos == 1){
+        clearInterval(inv);
+        lift.stop();
+        if(callback){ callback(); }
+      }
+    }, 100);
   },
   down: ()=>{
     relay.liftup.off();
     relay.liftdown.on();
+    let inv = setInterval(()=>{
+      if(global.var.liftpos == 2){
+        clearInterval(inv);
+        lift.stop();
+        if(callback){ callback(); }
+      }
+    }, 100);
   },
   stop: ()=>{
     relay.liftup.off();
@@ -141,18 +142,16 @@ let lift = {
 }
 
 let other = {
-  beep: ()=>{
+  beep: (bb = false)=>{
     // if(global.var.beep){
       global.var.beep = false;
       relay.beep.on();
       setTimeout(()=>{
         relay.beep.off();
+        if(bb){ setTimeout(()=>{ other.beep(); }, 200); }
       },200);
     // }
   }
 }
 
-module.exports = {
-  board,
-  other
-};
+module.exports = { board, relay, lamp, move, speed, lift, other };
