@@ -1,12 +1,13 @@
 const five = require("johnny-five");
 const d3 = require("d3-scale");
 const calc = require('./utils/calc');
+const ardu = require("./H-Bridge");
 const board = new five.Board({ repl: false, debug: true });
 
 let calcPoten = d3.scaleLinear().domain([150, 855]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-10, 10]).clamp(true);
 
-let relay, poten, liftPosUp, liftPosDown;
+let relay, poten, liftPosUp, liftPosDown, motors, lamp;
 
 board.on("exit", ()=> {
   console.log('exit');
@@ -14,59 +15,71 @@ board.on("exit", ()=> {
 
 board.on("ready", ()=> {
   relay = {
-    enable: new five.Relay({ pin: "A9", type: "NC" }),
-    forward: new five.Relay({ pin: "A15", type: "NC" }),
-    backward: new five.Relay({ pin: "A14", type: "NC" }),
-    beep: new five.Relay({ pin: "A10", type: "NC" }),
-    liftup: new five.Relay({ pin: "A12", type: "NC" }),
-    liftdown: new five.Relay({ pin: "A11", type: "NC" })
+    enable: new ardu.Relay({ pin: 22 }),
+    forward: new ardu.Relay({ pin: 23 }),
+    backward: new ardu.Relay({ pin: 24 }),
+    beep: new ardu.Relay({ pin: 25 }),
+    liftup: new ardu.Relay({ pin: 26 }),
+    liftdown: new ardu.Relay({ pin: 27 }),
+    xx: new ardu.Relay({ pin: 28 }),
+    cc: new ardu.Relay({ pin: 29 })
   };
 
-	poten 			= new five.Sensor({ pin: "A7", freq: 120 });
-	liftPosUp 		= new five.Button({ pin: 31, isPullup: true });
-	liftPosDown 	= new five.Button({ pin: 33, isPullup: true });
+  lamp = {
+    r: new five.Led({ pin: 34 }),
+    o: new five.Led({ pin: 35 }),
+    g: new five.Led({ pin: 36 }),
+    b: new five.Led({ pin: 37 }),
+    w: new five.Led({ pin: 38 })
+  };
+  lamp.r.blink();
+  lamp.o.blink();
+  lamp.g.blink();
+  lamp.b.blink();
+  lamp.w.blink();
+
+	poten 			= new five.Sensor({ pin: "A5", freq: 120 });
+	liftPosUp 		= new five.Button({ pin: 6, isPullup: true });
+	liftPosDown 	= new five.Button({ pin: 7, isPullup: true });
 
   poten.on("data", function() {
     global.var.currDeg = calcPoten(this.value).toFixed(0);
     let diff = global.var.selDeg - global.var.currDeg;
     global.var.diffDeg = (diff).toFixed(0);//calcDiff(diff).toFixed(0);
+    if(global.var.diffDeg < 0){
+      // motors.forward(180);
+    }else if(global.var.diffDeg > 0){
+      // motors.reverse(180);
+    }else{
+      // motors.stop();
+    }
   });
 
 	liftPosUp.on("down", 	()=> { 
-    global.var.liftpos = 2; 
+    global.var.liftpos = 1; 
     global.var.liftup = 0; 
   });
 	liftPosUp.on("up", 		()=> { global.var.liftpos = 0; });
 
 	liftPosDown.on("down", 	()=> { 
-    global.var.liftpos = 1; 
+    global.var.liftpos = 2; 
     global.var.liftup = 0; 
   });
 	liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
-    speed.accel(); //check speed change
-    console.log(new Date());
+    speed.accel();
 
-    if(global.var.en){
-      relay.enable.on();
-      move.dir(global.var.dirfw);
-    }else{
-      move.stop();
-    } 
-
-    if(global.var.liftup == 1){ lift.up(); }
-    else if(global.var.liftup == 2){ lift.down(); }
-    else{ lift.stop(); }
-
-    if(global.var.beep){
-      global.var.beep = false;
-      relay.beep.on();
-      setTimeout(()=>{
-        relay.beep.off();
-      },200);
-    }
+    lift.process();
 	});
+
+  setTimeout(()=>{
+    global.var.liftup = 2;
+    setTimeout(()=>{
+      global.var.liftpos = 2; 
+      global.var.liftup = 0; 
+    },10000);
+  }, 3000);
 
   board.on("exit", ()=> {
     console.log('exit');
@@ -74,6 +87,10 @@ board.on("ready", ()=> {
 });
 
 let move = {
+  en: (flag)=>{
+    if(flag){ global.var.en = true; relay.enable.on(); }
+    else{ global.var.en = false; relay.enable.off(); }
+  },
   dir: (fw)=>{
     if(fw){
       relay.backward.off();
@@ -104,6 +121,11 @@ let speed = {
 }
 
 let lift = {
+  process: ()=>{
+    if(global.var.liftup == 1){ lift.up(); }
+    else if(global.var.liftup == 2){ lift.down(); }
+    else{ lift.stop(); }
+  },
   up: ()=>{
     relay.liftdown.off();
     relay.liftup.on();
@@ -118,4 +140,19 @@ let lift = {
   }
 }
 
-module.exports = board;
+let other = {
+  beep: ()=>{
+    // if(global.var.beep){
+      global.var.beep = false;
+      relay.beep.on();
+      setTimeout(()=>{
+        relay.beep.off();
+      },200);
+    // }
+  }
+}
+
+module.exports = {
+  board,
+  other
+};
