@@ -5,7 +5,7 @@ class BTS7960 {
   constructor(en, pwml, pwmr) {
   	this.pwml = new five.Motor(pwml);
   	this.pwmr = new five.Motor(pwmr);
-    this.en = new five.Pin(13);
+    this.en = new five.Pin(en);
     this.en.low();
   }
 

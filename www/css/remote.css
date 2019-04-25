@@ -1,12 +1,63 @@
-#speed{
+body{
+  overflow: hidden;
+}
+#dir{
   position: absolute;
-  top: 20px;
+  left: 25%;
+}
+.btn-light{
+  background-color: #BABABA;
+  border-color: #838383;
+  padding: 6px 4px;
+  margin-right: 2px;
+  width: 96px;
+}
+.btn-group .btn-light{
+  width: 100px;
+  margin-right: 0px;
+}
+.btn-light.sel{
+  background-color: #8ac1ef;
+}
+.slider.slider-vertical{
+  position: absolute;
+  height: 320px;
   left: 20px;
+}
+#exSpeed .slider-track-high {
+  background: #8ac1ef;
+  /*8ac1ef*/
+}
+.slider-selection.tick-slider-selection {
+  background-image: -webkit-linear-gradient(top,#BABABA 0,#BABABA 100%);
+  background-image: -o-linear-gradient(top,#BABABA 0,#BABABA 100%);
+  background-image: linear-gradient(to bottom,#BABABA 0,#BABABA 100%);
+  background-repeat: repeat-x;
+}
+.slider.slider-vertical .slider-track{
+  border: 1px solid #838383;
+  left: 10px;
+  width: 40px;
+}
+.slider-handle{
+  left: 5px;
+  width: 50px;
+  height: 50px;
+}
+.slider.slider-vertical .slider-tick, .slider.slider-vertical .slider-handle{
+  margin-top: -30px;
+}
+.slider.slider-vertical .slider-tick-label-container .slider-tick-label{
+  font-size: 8px;
+  padding-left: 35px;
+}
+.slider-tick-container{
+  opacity: 0;
 }
 #slider1, #slider2{
   position: absolute;
   top: 20px;
-  left: 120px;
+  left: 30px;
 }
 #slider1{
   z-index: 999;
@@ -49,7 +100,7 @@
     background-color: #8832cd;
 }
 #slider2 .rs-path-color  {
-    background-color: red;
+    background-color: #8ac1ef;
 }
 .top .rs-tooltip {
     bottom: -25px;

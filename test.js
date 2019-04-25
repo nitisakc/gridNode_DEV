@@ -6,8 +6,11 @@ const board = new five.Board();
 
 board.on("ready", ()=> {
   let relay = {
-    enable: new ardu.Relay({ pin: 22 })
+    enable: new ardu.Relay({ pin: 22, type: "NO" })
   };
+
+  this.r = new five.Pin(obj.pin);
+  this.r.on(); 
 
   // var motorsR = new five.Motors([{ pins: { enable: 12, pwm: 11 }, invertPWM: false }]);
   // var motorsL = new five.Motors([{ pins: { enable: 4, pwm: 5 }, invertPWM: false }]);
@@ -18,7 +21,7 @@ board.on("ready", ()=> {
     relay.brake.toggle();
     relay.forward.toggle();
 
-    // speed.start(200);
+     speed.start(200);
     speed.stop();
 
     // motorsR.forward(255);

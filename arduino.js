@@ -2,13 +2,12 @@ const five = require("johnny-five");
 const d3 = require("d3-scale");
 const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
-const board = new five.Board({ repl: false, debug: true });
+const board = new five.Board({ repl: false, debug: false });
 
 let calcPoten = d3.scaleLinear().domain([150, 855]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
 
-let relay, poten, liftPosUp, liftPosDown, motors, lamp;
-let trunMotor = new BTS7960(45, 44, 46);
+let relay, poten, liftPosUp, liftPosDown, motors, lamp, trunMotor;
 
 board.on("exit", ()=> {
   console.log('exit');
@@ -21,10 +20,12 @@ board.on("ready", ()=> {
     backward: new eight.Relay({ pin: 24 }),
     beep: new eight.Relay({ pin: 25 }),
     liftup: new eight.Relay({ pin: 26 }),
-    liftdown: new eight.Relay({ pin: 27 })
+    liftdown: new eight.Relay({ pin: 27 }),
+    a: new eight.Relay({ pin: 28 }),
+    b: new eight.Relay({ pin: 29 })
   };
 
-  lamp = {
+  global.lamp = lamp = {
     r: new five.Led({ pin: 34 }),
     o: new five.Led({ pin: 35 }),
     g: new five.Led({ pin: 36 }),
@@ -32,6 +33,7 @@ board.on("ready", ()=> {
     w: new five.Led({ pin: 38 })
   };
 
+  trunMotor     = new eight.BTS7960(45, 44, 46);
 	poten 			  = new five.Sensor({ pin: "A5", freq: 120 });
 	liftPosUp 		= new five.Button({ pin: 6, isPullup: true });
 	liftPosDown 	= new five.Button({ pin: 7, isPullup: true });
@@ -41,9 +43,9 @@ board.on("ready", ()=> {
     let diff = global.var.selDeg - global.var.currDeg;
     global.var.diffDeg = (diff).toFixed(0);//calcDiff(diff).toFixed(0);
     if(global.var.diffDeg < 0){
-      trunMotor.start(180);
+      trunMotor.right(180);
     }else if(global.var.diffDeg > 0){
-      trunMotor.start(180);
+      trunMotor.lift(180);
     }else{
       trunMotor.stop();
     }
@@ -61,8 +63,18 @@ board.on("ready", ()=> {
   });
 	liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
-	board.loop(50, ()=> {
+	board.loop(40, ()=> {
     speed.accel();
+
+    if(global.var.en && global.var.dir != 0){
+      if(Math.abs(global.var.diffDeg) > 30){
+        lampStatus.danger();
+      }else{
+        lampStatus.warning();
+      }
+    }else{
+      lampStatus.standby();
+    }
 	});
 
   board.on("exit", ()=> {
@@ -70,50 +82,87 @@ board.on("ready", ()=> {
   });
 });
 
+let lampStatus = {
+  danger: ()=>{
+    lamp.r.on();
+    lamp.o.off();
+    lamp.g.off();
+  },
+  warning: ()=>{
+    lamp.r.off();
+    lamp.o.on();
+    lamp.g.off();
+  },
+  standby: ()=>{
+    lamp.r.off();
+    lamp.o.off();
+    lamp.g.on();
+  }
+};
+
 let move = {
   en: (flag)=>{
-    if(flag){ global.var.en = true; relay.enable.on(); }
-    else{ global.var.en = false; relay.enable.off(); }
+    if(flag){ 
+      if(global.var.dir != 0){
+        global.var.en = true; 
+        relay.enable.on(); 
+      }
+    }
+    else{ 
+      global.var.en = false; 
+      relay.enable.off(); 
+      global.var.currSpd = 0;
+      global.var.selSpd = 0;
+    }
   },
   dir: (fw)=>{
     if(fw){
+      global.var.dir = 1;
       relay.backward.off();
       relay.forward.on();
     }else{
+      global.var.dir = 2;
       relay.forward.off(); 
       relay.backward.on();
     }
   },
   stop: ()=>{
-    relay.enable.off();
+    move.en(false);
     relay.forward.off(); 
     relay.backward.off();
-    global.var.currSpd = 0;
-    global.var.setSpd = 0;
+    global.var.dir = 0;
   }
 }
 
 let speed = {
   accel: ()=>{
-    let s = global.var.setSpd - global.var.currSpd;
-    if(s > 0){
-      global.var.currSpd++;
-    }else if(s < 0){
-      global.var.currSpd--;
+    let s = global.var.selSpd - global.var.currSpd;
+
+    if(global.var.en && global.var.dir != 0){
+      if(s > 0){
+        global.var.currSpd++;
+      }else if(s < 0){
+        global.var.currSpd--;
+      }
+    }else{
+      global.var.selSpd = 0;
+      global.var.currSpd = 0;
     }
   },
   set: (val)=>{
-    global.var.setSpd = val;
+    global.var.selSpd = val;
   }
 }
 
 let lift = {
-  process: ()=>{
+  process: (val)=>{
+    global.var.liftup = val;
     if(global.var.liftup == 1){ lift.up(); }
     else if(global.var.liftup == 2){ lift.down(); }
     else{ lift.stop(); }
   },
   up: (callback)=>{
+    global.var.liftup = 1;
     relay.liftdown.off();
     relay.liftup.on();
     let inv = setInterval(()=>{
@@ -125,6 +174,7 @@ let lift = {
     }, 100);
   },
   down: ()=>{
+    global.var.liftup = 2;
     relay.liftup.off();
     relay.liftdown.on();
     let inv = setInterval(()=>{
@@ -136,6 +186,7 @@ let lift = {
     }, 100);
   },
   stop: ()=>{
+    global.var.liftup = 0;
     relay.liftup.off();
     relay.liftdown.off();
   }

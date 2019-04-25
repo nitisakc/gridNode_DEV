@@ -36,23 +36,7 @@ server.listen(port);
 
 global.syss = pjson.syss;
 global.var = pjson.var;
-const syss = require('./syss');
 
 global.io = require('socket.io').listen(server);
-global.io.on('connection', function(socket) {
-	global.io.to(socket.id).emit('conn', socket.id);
-
-	socket.on('ar', 	 (msgs)=> { global.var.ar 		= msgs; });
-
-	socket.on('pidval',  (msgs)=> { 
-		global.var.pidval = msgs; 
-	    global.io.emit('pidval', msgs);
-	});
-
-	socket.on('selDeg',  (msgs)=> { 
-		global.var.selDeg = msgs; 
-	    // global.io.emit('pidval', msgs);
-	});
-});
 
 module.exports = app;

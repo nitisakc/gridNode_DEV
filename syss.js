@@ -1,3 +1,4 @@
+
 const scanner = require('node-wifi-scanner');
 const d3 = require("d3-scale");
 const ping = require('ping');
@@ -18,6 +19,18 @@ let scanwifi = ()=>{
 
 			global.syss.wifi = (n == undefined ? 0 : (calcWifi(n.rssi)));
 			// console.log(n);
+			if(global.syss.wifi > 0){
+				global.lamp.b.on();
+				setTimeout(()=>{
+					global.lamp.b.off();
+					setTimeout(()=>{
+						global.lamp.b.on();
+						setTimeout(()=>{
+							global.lamp.b.off();
+						},100);
+					},2000);
+				},100);
+			}
 		});	
 	}, 5000);
 }

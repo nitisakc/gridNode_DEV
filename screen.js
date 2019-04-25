@@ -16,7 +16,7 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
     columnSpacing: 1,
     columnWidth: [17, 10]
   });
-  let varName = ['en','dirfw', 'currSpd', 'setSpd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'pallet'];
+  let varName = ['en','dir', 'currSpd', 'selSpd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'pallet'];
   function generateTable() {
      let data = [];
      for (let i = 0; i < varName.length; i++) {
@@ -31,8 +31,6 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
      table.setData({ headers: ['Names', 'Values'], data: data });
 
      screen.render();
-
-     global.io.emit('var', global.var);
   }
   generateTable();
   setInterval(generateTable, 200);

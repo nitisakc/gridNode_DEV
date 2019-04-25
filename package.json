@@ -46,9 +46,9 @@
   },
   "var": {
     "en": false,
-    "dirfw": true,
+    "dir": 0,
     "currSpd": 0,
-    "setSpd": 0,
+    "selSpd": 0,
     "currDeg": 255,
     "selDeg": 90,
     "diffDeg": 0,

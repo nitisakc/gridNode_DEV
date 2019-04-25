@@ -3,31 +3,40 @@
 <head>
 	<title></title>
     <meta charset="UTF-8">
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+  	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.1/css/bootstrap-slider.min.css">
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/roundSlider/1.3.3/roundslider.min.css">
 	<link rel="stylesheet" type="text/css" href="css/remote.css">
 	<link rel="stylesheet" type="text/css" href="css/rangeslider.css">
 	<style type="text/css" id="css"></style>
 </head>
 <body ng-app="APP" ng-controller="mainCtrl">
-	<div class="container">
-		<div class="row">
-			<div class="col col-md-12 col-xs-12">
-				<div>	
-					<div id="slider1"></div>
-					<div id="slider2"></div>	
-				</div>
-			</div>
+	<div id="slider1"></div>
+	<div id="slider2"></div>	
+	<input id="speed" data-slider-id='exSpeed' type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0" data-slider-orientation="vertical"/>
+	<div id="dir">
+		<div class="">
+			<button type="button" ng-click="emit('en',!en)" ng-class="en ? 'sel' : ''" class="btn btn-light">Enable</button>
+			<button type="button" ng-click="emit('beep',!beep)" ng-class="beep ? 'sel' : ''" class="btn btn-light">Beep</button>
+			<button type="button" ng-click="emit('pidon',!pidon)" ng-class="pidon ? 'sel' : ''" class="btn btn-light">PID</button>
 		</div>
-		<div class="row">
-			<div class="col col-md-3 col-xs-3">
-				<!-- <input type="range" min="0" max="100" step="1" value="4 0" data-orientation="vertical"> -->
-			</div>
+		<br>
+		<div class="btn-group" role="group">
+			<button type="button" ng-click="emit('dir',0)" ng-class="dir == 0 ? 'sel' : ''" class="btn btn-light">None</button>
+			<button type="button" ng-click="emit('dir',1)" ng-class="dir == 1 ? 'sel' : ''" class="btn btn-light">Forward</button>
+			<button type="button" ng-click="emit('dir',2)" ng-class="dir == 2 ? 'sel' : ''" class="btn btn-light">Backward</button>
+		</div>
+		<br><br>
+		<div class="btn-group" role="group">
+			<button type="button" ng-click="emit('liftup',0)" ng-class="liftup == 0 ? 'sel' : ''" class="btn btn-light">Stop</button>
+			<button type="button" ng-click="emit('liftup',1)" ng-class="liftup == 1 ? 'sel' : ''" class="btn btn-light">Lift Up</button>
+			<button type="button" ng-click="emit('liftup',2)" ng-class="liftup == 2 ? 'sel' : ''" class="btn btn-light">Lift Down</button>
 		</div>
 	</div>
 	<script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.1/bootstrap-slider.min.js"></script>
 	<script type="text/javascript" src="js/angular.min.js"></script>
 	<script type="text/javascript" src="js/socket.io.js" ></script>
 	<script type="text/javascript" src="js/rangeslider.min.js" ></script>
@@ -46,7 +55,7 @@
 
 				  });
 
-				let selDeg = 90;
+				$scope.selDeg = 90;
 				$("#slider1").roundSlider({
 				    circleShape: "half-top",
 				    min: 0,
@@ -60,8 +69,14 @@
 				    handleSize: "60,20",
 				    animation: false,
 				    drag: (e)=>{
-				    	selDeg = e.value;
+				    	$scope.selDeg = e.value;
 				    	socket.emit('selDeg', e.value);
+				    },
+				    change: (e)=>{
+				    	if(e.preValue != e.value){
+							$scope.selDeg = e.value;
+						    socket.emit('selDeg', e.value);
+						}
 				    }
 				});
 
@@ -78,6 +93,20 @@
 				    animation: true
 				});
 
+			    var slider = new Slider("#speed", {
+					reversed : true,
+    				ticks: [0, 50, 100],
+    				ticks_labels: ['0%', '50%', '100%']
+				}).on('slide', (e)=>{
+					$scope.selSpd = e;
+				    socket.emit('selSpd', e);
+				}).on('change', (e)=>{
+					if(e.oldValue != e.newValue){
+						$scope.selSpd = e;
+					    socket.emit('selSpd', e.newValue);
+					}
+				});
+				$('#css').append('.slider.slider-vertical, #dir{ top:' + (($(window).width() / 1.8) + 20) +'px; }');
 				$('#css').append('#slider2 .rs-handle:after{ width:' + $(window).width() / 2 * 0.9 +'px; }');
 
 				var socket = io.connect('/');
@@ -90,7 +119,19 @@
 			        	// selDeg = msg.selDeg;
 			        	$("#slider2").roundSlider("setValue", msg.currDeg);
 			        	$("#slider1").roundSlider("setValue", msg.selDeg);
+			        	$scope.$apply(()=>{
+				        	$scope.en = msg.en;
+				        	$scope.beep = msg.beep;
+				        	$scope.pidon = msg.pidon;
+				        	$scope.dir = msg.dir;
+				        	$scope.liftup = msg.liftup;
+				        	slider.setValue(msg.selSpd);
+				        });
 			        });
+
+			        $scope.emit = (name, val)=>{
+			        	socket.emit(name, val);
+			        }
 			    }
 			});
 		});
