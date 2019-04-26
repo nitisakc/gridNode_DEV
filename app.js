@@ -44,15 +44,15 @@ global.log = (msg, type = "log")=>{
 global.io = require('socket.io').listen(server);
 
 global.pyio = require('socket.io-client').connect('http://localhost:5000/');
-tcs.on('connect', () => {
-  tcs.on('conn', function (msg) {
+global.pyio.on('connect', () => {
+  global.pyio.on('conn', function (msg) {
     global.log("pyio id: " + msg);
   });
-  tcs.on('ar', function (msg) {
+  global.pyio.on('ar', function (msg) {
     global.var.ar = msg
   });
 });
 
-tcs.on('disconnect', function () { global.log('pyio disconnect'); });
+global.pyio.on('disconnect', function () { global.log('pyio disconnect'); });
 
 module.exports = app;
