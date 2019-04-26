@@ -36,7 +36,23 @@ server.listen(port);
 
 global.syss = pjson.syss;
 global.var = pjson.var;
+global.log = (msg, type = "log")=>{
+	global.var.logs.unshift({ msg: msg, type: type, time: new Date() });
+	if(global.var.logs.length > 20) global.var.logs.pop();
+}
 
 global.io = require('socket.io').listen(server);
+
+global.pyio = require('socket.io-client').connect('http://localhost:5000/');
+tcs.on('connect', () => {
+  tcs.on('conn', function (msg) {
+    global.log("pyio id: " + msg);
+  });
+  tcs.on('ar', function (msg) {
+    global.var.ar = msg
+  });
+});
+
+tcs.on('disconnect', function () { global.log('pyio disconnect'); });
 
 module.exports = app;
