@@ -6,6 +6,7 @@ const board = new five.Board({ repl: false, debug: false });
 
 let calcPoten = d3.scaleLinear().domain([150, 855]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
+let calcSpeed = d3.scaleLinear().domain([0, 100]).range([50, 255]).clamp(true);
 
 let relay, poten, liftPosUp, liftPosDown, motors, lamp, trunMotor;
 
@@ -33,6 +34,7 @@ board.on("ready", ()=> {
     w: new five.Led({ pin: 38 })
   };
 
+  motors        = new five.Motor(5); 
   trunMotor     = new eight.BTS7960(45, 44, 46);
 	poten 			  = new five.Sensor({ pin: "A5", freq: 120 });
 	liftPosUp 		= new five.Button({ pin: 6, isPullup: true });
@@ -144,9 +146,11 @@ let speed = {
       }else if(s < 0){
         global.var.currSpd--;
       }
+      motors.start(calcSpeed(global.var.currSpd));
     }else{
       global.var.selSpd = 0;
       global.var.currSpd = 0;
+      motors.stop();
     }
   },
   set: (val)=>{

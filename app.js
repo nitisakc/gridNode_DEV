@@ -43,7 +43,8 @@ global.log = (msg, type = "log")=>{
 
 global.io = require('socket.io').listen(server);
 
-global.pyio = require('socket.io-client').connect('http://localhost:5000/');
+global.pyio = require('socket.io-client')
+				.connect('http://localhost:5000/');
 global.pyio.on('connect', () => {
   global.pyio.on('conn', function (msg) {
     global.log("pyio id: " + msg);
@@ -52,7 +53,11 @@ global.pyio.on('connect', () => {
     global.var.ar = msg
   });
 });
-
 global.pyio.on('disconnect', function () { global.log('pyio disconnect'); });
+
+global.tcsio = require('socket.io-client')
+				.connect(args.tcshost, { query: `room=cars&number=${args.carNumber}&type=${args.carType}&port=${args.port}` });
+global.tcsio.on('connect', () => { global.lamp.w.strobe(500); });
+global.tcsio.on('disconnect', () => { global.lamp.w.stop(); global.lamp.w.off(); });
 
 module.exports = app;

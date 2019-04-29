@@ -43,6 +43,7 @@
     "wifi": null,
     "tcs": null
   },
+  "tcshost": "ws://localhost:3310",
   "logs": [],
   "var": {
     "en": false,
