@@ -42,7 +42,8 @@ board.on("ready", ()=> {
 
   poten.on("data", function() {
     global.var.currDeg = calcPoten(this.value).toFixed(0);
-    let diff = global.var.selDeg - global.var.currDeg;
+    let sdeg = global.var.pidon ? global.var.pidval : global.var.selDeg;
+    let diff = sdeg - global.var.currDeg;
     global.var.diffDeg = (diff).toFixed(0);//calcDiff(diff).toFixed(0);
     if(global.var.diffDeg < 0){
       trunMotor.right(180);
@@ -66,7 +67,7 @@ board.on("ready", ()=> {
 	liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
-    speed.accel();
+    move.accel();
 
     if(global.var.en && global.var.dir != 0){
       if(Math.abs(global.var.diffDeg) > 30){
@@ -103,7 +104,16 @@ let lampStatus = {
 };
 
 let move = {
-  en: (flag)=>{
+  run: (fw, spd, pid = false)=>{
+    move.pid(pid); 
+    move.dir(fw);
+    move.en();
+    move.speed(spd);
+  },
+  pid: (onoff = true)=>{
+    global.var.pidon = onoff; 
+  },
+  en: (flag = true)=>{
     if(flag){ 
       if(global.var.dir != 0){
         global.var.en = true; 
@@ -133,10 +143,10 @@ let move = {
     relay.forward.off(); 
     relay.backward.off();
     global.var.dir = 0;
-  }
-}
-
-let speed = {
+  },
+  speed: (val)=>{
+    global.var.selSpd = val;
+  },
   accel: ()=>{
     let s = global.var.selSpd - global.var.currSpd;
 
@@ -146,15 +156,13 @@ let speed = {
       }else if(s < 0){
         global.var.currSpd--;
       }
+      // global.var.currSpd = parseInt(global.var.currSpd+"");
       motors.start(calcSpeed(global.var.currSpd));
     }else{
       global.var.selSpd = 0;
       global.var.currSpd = 0;
       motors.stop();
     }
-  },
-  set: (val)=>{
-    global.var.selSpd = val;
   }
 }
 
@@ -209,4 +217,4 @@ let other = {
   }
 }
 
-module.exports = { board, relay, lamp, move, speed, lift, other };
+module.exports = { board, relay, lamp, move, lift, other };

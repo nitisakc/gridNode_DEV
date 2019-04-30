@@ -1,5 +1,5 @@
 let app = require('./app');
-const { board, relay, lamp, move, speed, lift, other } = require('./arduino');
+const { board, relay, lamp, move, lift, other } = require('./arduino');
 const syss = require('./syss');
 
 global.io.on('connection', function(socket) {
@@ -24,6 +24,12 @@ global.io.on('connection', function(socket) {
 setInterval(()=>{
     global.io.emit('var', global.var);
 }, 200);
+
+setTimeout(()=>{
+	move.dir(true);
+	move.en();
+	move.speed(50);
+},3000);
 
 require('./screen');
 
