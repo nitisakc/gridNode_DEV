@@ -2,27 +2,32 @@
 const five = require("johnny-five");
 
 class BTS7960 {
-  constructor(en, pwml, pwmr) {
+  constructor(enl, enr, pwml, pwmr) {
   	this.pwml = new five.Motor(pwml);
   	this.pwmr = new five.Motor(pwmr);
-    this.en = new five.Pin(en);
-    this.en.low();
+    this.enl = new five.Pin(enl);
+    this.enr = new five.Pin(enr);
+    this.enl.low();
+    this.enr.low();
   }
 
   right(pwm = 255){
-    this.en.high();
+    this.enl.high();
+    this.enr.high();
     this.pwml.start(0);
     this.pwmr.start(pwm);
   }
 
   lift(pwm = 255){
-    this.en.high();
+    this.enl.high();
+    this.enr.high();
     this.pwmr.start(0);
     this.pwml.start(pwm);
   }
 
   stop() {
-    this.en.low();
+    this.enl.low();
+    this.enr.low();
     this.pwml.stop();
     this.pwmr.stop();
   }

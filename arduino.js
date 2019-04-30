@@ -4,7 +4,7 @@ const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
 const board = new five.Board({ repl: false, debug: false });
 
-let calcPoten = d3.scaleLinear().domain([150, 855]).range([0, 180]).clamp(true);
+let calcPoten = d3.scaleLinear().domain([850, 155]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
 let calcSpeed = d3.scaleLinear().domain([0, 100]).range([50, 255]).clamp(true);
 
@@ -34,8 +34,8 @@ board.on("ready", ()=> {
     w: new five.Led({ pin: 38 })
   };
 
-  motors        = new five.Motor(5); 
-  trunMotor     = new eight.BTS7960(45, 44, 46);
+  motors        = new five.Motor(4); 
+  trunMotor     = new eight.BTS7960(45, 47, 44, 46); //use en 45 only
 	poten 			  = new five.Sensor({ pin: "A5", freq: 120 });
 	liftPosUp 		= new five.Button({ pin: 6, isPullup: true });
 	liftPosDown 	= new five.Button({ pin: 7, isPullup: true });
@@ -67,6 +67,7 @@ board.on("ready", ()=> {
 	liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
+    // trunMotor.lift(180);
     move.accel();
 
     if(global.var.en && global.var.dir != 0){
@@ -115,10 +116,10 @@ let move = {
   },
   en: (flag = true)=>{
     if(flag){ 
-      if(global.var.dir != 0){
+      // if(global.var.dir != 0){
         global.var.en = true; 
         relay.enable.on(); 
-      }
+      // }
     }
     else{ 
       global.var.en = false; 

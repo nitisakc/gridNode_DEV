@@ -33,6 +33,11 @@
 			<button type="button" ng-click="emit('liftup',1)" ng-class="liftup == 1 ? 'sel' : ''" class="btn btn-light">Lift Up</button>
 			<button type="button" ng-click="emit('liftup',2)" ng-class="liftup == 2 ? 'sel' : ''" class="btn btn-light">Lift Down</button>
 		</div>
+		<br><br>
+		<svg width="320" height="180"
+		  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">       
+		  <image xlink:href="https://mdn.mozillademos.org/files/6457/mdn_logo_only_color.png" height="480" width="270"/>
+		</svg>
 	</div>
 	<script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
@@ -132,6 +137,17 @@
 			        $scope.emit = (name, val)=>{
 			        	socket.emit(name, val);
 			        }
+			    }
+
+			    var imgsio = io.connect('ws://localhost:5000/');
+			    if(imgsio){
+			        imgsio.on('conn', function (msg) {
+			            console.log("Imgsio id: " + msg);
+			        });
+
+			        imgsio.on('img', function (msg) {
+			        	console.log(msg);
+			        });
 			    }
 			});
 		});

@@ -12,6 +12,8 @@ global.io.on('connection', function(socket) {
 	    global.io.emit('pidval', msgs);
 	});
 
+	socket.on('img',  (msgs)=> { console.log(msgs); });
+
 	socket.on('selDeg',  (msgs)=> { global.var.selDeg = msgs; });
 	socket.on('selSpd',  (msgs)=> { global.var.selSpd = msgs; });
 	socket.on('en',  (msgs)=> { move.en(msgs); });
@@ -25,12 +27,12 @@ setInterval(()=>{
     global.io.emit('var', global.var);
 }, 200);
 
-setTimeout(()=>{
-	move.dir(true);
-	move.en();
-	move.speed(50);
-},3000);
-
+// setTimeout(()=>{
+// 	move.dir(true);
+// 	move.en();
+// 	move.speed(50);
+// },3000);
+// 
 require('./screen');
 
 
