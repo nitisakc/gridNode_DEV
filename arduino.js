@@ -2,11 +2,11 @@ const five = require("johnny-five");
 const d3 = require("d3-scale");
 const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
-const board = new five.Board({ repl: false, debug: false });
+const board = new five.Board({ repl: false, debug: true });
 
 let calcPoten = d3.scaleLinear().domain([850, 155]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
-let calcSpeed = d3.scaleLinear().domain([0, 100]).range([50, 255]).clamp(true);
+let calcSpeed = d3.scaleLinear().domain([0, 100]).range([0, 255]).clamp(true);
 
 let relay, poten, liftPosUp, liftPosDown, motors, lamp, trunMotor;
 
@@ -22,8 +22,8 @@ board.on("ready", ()=> {
     beep: new eight.Relay({ pin: 25 }),
     liftup: new eight.Relay({ pin: 26 }),
     liftdown: new eight.Relay({ pin: 27 }),
-    a: new eight.Relay({ pin: 28 }),
-    b: new eight.Relay({ pin: 29 })
+    brake: new eight.Relay({ pin: 28 }),
+    emg: new eight.Relay({ pin: 29 })
   };
 
   global.lamp = lamp = {
@@ -35,6 +35,10 @@ board.on("ready", ()=> {
   };
 
   motors        = new five.Motor(4); 
+  // motors        = new five.Pin({
+  //   pin: 4,
+  //   mode: five.Pin.PWM
+  // });
   trunMotor     = new eight.BTS7960(45, 47, 44, 46); //use en 45 only
 	poten 			  = new five.Sensor({ pin: "A5", freq: 120 });
 	liftPosUp 		= new five.Button({ pin: 6, isPullup: true });
@@ -45,10 +49,11 @@ board.on("ready", ()=> {
     let sdeg = global.var.pidon ? global.var.pidval : global.var.selDeg;
     let diff = sdeg - global.var.currDeg;
     global.var.diffDeg = (diff).toFixed(0);//calcDiff(diff).toFixed(0);
-    if(global.var.diffDeg < 0){
-      trunMotor.right(180);
-    }else if(global.var.diffDeg > 0){
-      trunMotor.lift(180);
+    let d = calcDiff(diff).toFixed(0);
+    if(d < 0){
+      trunMotor.lift(255);
+    }else if(d > 0){
+      trunMotor.right(255);
     }else{
       trunMotor.stop();
     }
@@ -67,7 +72,7 @@ board.on("ready", ()=> {
 	liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
-    // trunMotor.lift(180);
+    // trunMotor.right(180);
     move.accel();
 
     if(global.var.en && global.var.dir != 0){
@@ -119,11 +124,15 @@ let move = {
       // if(global.var.dir != 0){
         global.var.en = true; 
         relay.enable.on(); 
+        relay.brake.on(); 
+        // relay.emg.on(); 
       // }
     }
     else{ 
       global.var.en = false; 
       relay.enable.off(); 
+      relay.brake.off(); 
+      // relay.emg.off(); 
       global.var.currSpd = 0;
       global.var.selSpd = 0;
     }
@@ -153,17 +162,25 @@ let move = {
 
     if(global.var.en && global.var.dir != 0){
       if(s > 0){
-        global.var.currSpd++;
+        global.var.currSpd = global.var.currSpd + 1;
       }else if(s < 0){
-        global.var.currSpd--;
+        global.var.currSpd = global.var.currSpd - 1;
       }
       // global.var.currSpd = parseInt(global.var.currSpd+"");
-      motors.start(calcSpeed(global.var.currSpd));
+      if(global.var.currSpd < 5){
+        motors.stop();
+        // board.io.pwmWrite(4, 0);
+      }else{
+        motors.start(calcSpeed(global.var.currSpd));
+        // board.io.pwmWrite(4, calcSpeed(global.var.currSpd));
+      }
     }else{
       global.var.selSpd = 0;
       global.var.currSpd = 0;
       motors.stop();
+      // board.io.pwmWrite(4, 0);
     }
+    // console.log(global.var.currSpd);
   }
 }
 
