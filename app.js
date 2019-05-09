@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const logger = require('morgan');
+// const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const http = require('http');
@@ -12,6 +12,7 @@ parser.addArgument([ '-p', '--port' ], { defaultValue: pjson.port, required: fal
 var args = parser.parseArgs();
 
 const index = require('./routes/index');
+const ar = require('./routes/ar');
 
 let app = express();
 
@@ -28,6 +29,7 @@ app.use(function(req, res, next) {
 });
 
 app.use('/', index);
+app.use('/ar', ar);
 
 const port = args.port;
 app.set('port', port);

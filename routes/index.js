@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.sendfile('www/video.html');
+  res.sendfile('www/remote.html');
 });
 
 module.exports = router;

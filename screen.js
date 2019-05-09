@@ -16,7 +16,7 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
     columnSpacing: 1,
     columnWidth: [17, 10]
   });
-  let varName = ['en','dir', 'currSpd', 'selSpd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'pallet'];
+  let varName = ['en','dir', 'currSpd', 'selSpd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'pallet', 'rds'];
   function generateTable() {
      let data = [];
      for (let i = 0; i < varName.length; i++) {
@@ -36,21 +36,22 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
   setInterval(generateTable, 200);
 
 //table ar
-  let tableAr =  grid.set(0, 4, 5, 6, contrib.table, { 
+  let tableAr =  grid.set(0, 4, 5, 8, contrib.table, { 
     keys: false,
     fg: 'white',
     label: 'AR Vision',
     interactive: false,
     columnSpacing: 1,
-    columnWidth: [8, 8, 8, 8, 8, 8]
+    columnWidth: [8, 8, 8, 8, 8, 8, 8, 8, 8]
   });
   function generateTableAr() {
      let data = [];
-     tableAr.setData({ headers: ['ID', 'Len', 'Deg', 'XL', 'YL', 'Err'], data: [[0, 0, 0, 0, 0, 0]] });
+     // tableAr.setData({ headers: ['ID', 'Len', 'Deg', 'XL', 'YL', 'Err', 'Zone', 'X', 'Y'], data: [[0, 0, 0, 0, 0, 0, 0, 0, 0]] });
+     tableAr.setData({ headers: ['ID', 'Len', 'Deg', 'XL', 'YL', 'Err', 'Zone', 'X', 'Y'], data: global.var.ar });
      screen.render();
   }
   generateTableAr();
-  setInterval(generateTableAr, 100);
+  setInterval(generateTableAr, 250);
 
 //network status
   var netstat = grid.set(5, 0, 4, 4, contrib.donut, { 

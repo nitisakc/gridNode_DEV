@@ -5,10 +5,11 @@ const eight = require("./north-eight.js");
 const board = new five.Board({ repl: false, debug: true });
 
 let calcPoten = d3.scaleLinear().domain([850, 155]).range([0, 180]).clamp(true);
-let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
+let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-10, 10]).clamp(true);
 let calcSpeed = d3.scaleLinear().domain([0, 100]).range([0, 255]).clamp(true);
+let calcVolt = d3.scaleLinear().domain([0, 1024]).range([0, 5]).clamp(true);
 
-let relay, poten, liftPosUp, liftPosDown, motors, lamp, trunMotor;
+let relay, poten, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds;
 
 board.on("exit", ()=> {
   console.log('exit');
@@ -39,10 +40,29 @@ board.on("ready", ()=> {
   //   pin: 4,
   //   mode: five.Pin.PWM
   // });
+  
   trunMotor     = new eight.BTS7960(45, 47, 44, 46); //use en 45 only
 	poten 			  = new five.Sensor({ pin: "A5", freq: 120 });
+  liftp         = new five.Sensor({ pin: "A6", freq: 120 });
 	liftPosUp 		= new five.Button({ pin: 6, isPullup: true });
 	liftPosDown 	= new five.Button({ pin: 7, isPullup: true });
+  rds = [ new five.Proximity({ controller: "GP2Y0A02YK0F", pin: "A4" }),
+          new five.Proximity({ controller: "GP2Y0A02YK0F", pin: "A7" }) ];
+
+  rds[0].on("data", function() { global.var.rds[0] = this.cm; });
+  rds[1].on("data", function() { global.var.rds[1] = this.cm; });
+
+  liftp.on("data", function() {
+    // console.dir(calcVolt(this.value)); 
+    if(calcVolt(this.value) > 4){
+      global.var.liftpos = 2; 
+    } else if(calcVolt(this.value) < 1.5){
+      global.var.liftpos = 1; 
+    }else{
+      global.var.liftpos = 0; 
+    }
+    // global.var.liftpos = calcVolt(this.value);
+  });
 
   poten.on("data", function() {
     global.var.currDeg = calcPoten(this.value).toFixed(0);
@@ -59,17 +79,17 @@ board.on("ready", ()=> {
     }
   });
 
-	liftPosUp.on("down", 	()=> { 
-    global.var.liftpos = 1; 
-    global.var.liftup = 0; 
-  });
-	liftPosUp.on("up", 		()=> { global.var.liftpos = 0; });
+	// liftPosUp.on("down", 	()=> { 
+ //    global.var.liftpos = 1; 
+ //    global.var.liftup = 0; 
+ //  });
+	// liftPosUp.on("up", 		()=> { global.var.liftpos = 0; });
 
-	liftPosDown.on("down", 	()=> { 
-    global.var.liftpos = 2; 
-    global.var.liftup = 0; 
-  });
-	liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
+	// liftPosDown.on("down", 	()=> { 
+ //    global.var.liftpos = 2; 
+ //    global.var.liftup = 0; 
+ //  });
+	// liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
     // trunMotor.right(180);
@@ -149,6 +169,7 @@ let move = {
     }
   },
   stop: ()=>{
+    move.pid(false); 
     move.en(false);
     relay.forward.off(); 
     relay.backward.off();
@@ -204,14 +225,19 @@ let lift = {
     }, 100);
   },
   down: ()=>{
+    let co = 0;
     global.var.liftup = 2;
     relay.liftup.off();
     relay.liftdown.on();
     let inv = setInterval(()=>{
       if(global.var.liftpos == 2){
-        clearInterval(inv);
-        lift.stop();
-        if(callback){ callback(); }
+        co++;
+        if(co > 5){
+          co = 0;
+          clearInterval(inv);
+          lift.stop();
+          if(callback){ callback(); }
+        }
       }
     }, 100);
   },

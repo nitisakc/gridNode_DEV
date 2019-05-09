@@ -39,7 +39,7 @@ scanwifi();
 
 let pingtcs = ()=>{
 	setTimeout(()=>{
-		ping.promise.probe('192.168.1.1', {
+		ping.promise.probe('192.168.1.10', {
 	        timeout: 10,
 	        extra: ["-i 2"],
 	    }).then(function (res) {

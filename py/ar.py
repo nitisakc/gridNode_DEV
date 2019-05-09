@@ -9,11 +9,13 @@ import numpy as np
 import cv2
 import cv2.aruco as aruco
 import math
+import json
+import requests
 from utils import WebcamVideoStream
 
 # cap = WebcamVideoStream(src=0, width=1280, height=1024).start()
-cap = WebcamVideoStream(src=0, width=1440, height=1080).start()
-# cap = WebcamVideoStream(src=0, width=960, height=720).start()
+cap = WebcamVideoStream(src=0, width=1920, height=1080).start()
+# cap = WebcamVideoStream(src=0, width=1120, height=1080).start()
 aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_100)
 parameters =  aruco.DetectorParameters_create()
 
@@ -31,10 +33,12 @@ def PolygonArea(c):
 
 # sio = socketio.Client()
 # sio.connect('http://localhost:3001')
+old = ''
 while True:
 	frame = cap.read()
+	frame = frame[0:1080, 400:1520]
 	fh, fw, _ = frame.shape
-	cx, cy = int(fw/3), int(fh/3)
+	cx, cy = int(fw/2), int(fh/2)
 
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
@@ -55,11 +59,10 @@ while True:
 
 			length = math.sqrt(math.pow(x - cx, 2) + math.pow(y - cy, 2))
 
-			if int(ids[i]) == 18:
+			if int(ids[i]) != 999:
 				cv2.line(frame, (int(x), int(y)), (int(xtarget), int(ytarget)), (0, 180, 150), 1, 1)
 				cv2.line(frame, (cx, cy), (int(x), int(y)), (0, 0, 255), 2, 1)
 
-				# degree = math.atan2(ylast-ytarget, xlast-xtarget)
 				degree = math.atan2(ylast-ytarget, xlast-xtarget)
 				degree = math.degrees(degree) - 90
 				if degree < 0:
@@ -78,11 +81,15 @@ while True:
 
 		i = i + 1
 
-	print(objs)
+	url = str(objs)
+	if url != old:
+		old = url
+		r = requests.post('http://localhost:3001/ar/set/', json=objs)
+	# print(objs)
 
-	res = cv2.resize(frame, (int(fw/1), int(fh/1)))
+	res = cv2.resize(frame, (int(fw/2), int(fh/2)))
 	cv2.imshow('res',res)
-	# time.sleep(0.1)
+	# time.sleep(0.05)
 	# sio.emit('img', fh)
 
 	if cv2.waitKey(1) & 0xFF == ord('q'):
