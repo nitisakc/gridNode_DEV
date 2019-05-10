@@ -1,6 +1,3 @@
-import socketio
-import engineio
-import eventlet
 from threading import Thread
 import time
 import datetime
@@ -13,9 +10,7 @@ import json
 import requests
 from utils import WebcamVideoStream
 
-# cap = WebcamVideoStream(src=0, width=1280, height=1024).start()
-cap = WebcamVideoStream(src=0, width=1920, height=1080).start()
-# cap = WebcamVideoStream(src=0, width=1120, height=1080).start()
+cap = WebcamVideoStream(src=1, width=1920, height=1080).start()
 aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_100)
 parameters =  aruco.DetectorParameters_create()
 
@@ -31,8 +26,6 @@ def PolygonArea(c):
 	area = abs(area) / 2.0
 	return area
 
-# sio = socketio.Client()
-# sio.connect('http://localhost:3001')
 old = ''
 while True:
 	frame = cap.read()

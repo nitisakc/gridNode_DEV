@@ -38,9 +38,21 @@ server.listen(port);
 
 global.syss = pjson.syss;
 global.var = pjson.var;
-global.log = (msg, type = "log")=>{
-	global.var.logs.unshift({ msg: msg, type: type, time: new Date() });
-	if(global.var.logs.length > 20) global.var.logs.pop();
+// global.log = (msg, type = "log")=>{
+// 	global.var.logs.unshift({ msg: msg, type: type, time: new Date() });
+// 	if(global.var.logs.length > 20) global.var.logs.pop();
+// }
+global.logs = [];
+let old;
+global.log = (msgs)=>{
+  if(old != msgs){
+    old = msgs;
+    let dd = new Date();//dd.getHours()+''+
+    global.logs.push(dd.getMinutes()+'M'+dd.getSeconds()+'S:'+dd.getMilliseconds() + '|' + msgs);
+    if(global.logs.length > 30){
+      global.logs.pop();
+    }
+  }
 }
 
 global.io = require('socket.io').listen(server);

@@ -16,7 +16,7 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
     columnSpacing: 1,
     columnWidth: [17, 10]
   });
-  let varName = ['en','dir', 'currSpd', 'selSpd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'pallet', 'rds'];
+  let varName = ['en','dir', 'currSpd', 'selSpd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'route', 'rds'];
   function generateTable() {
      let data = [];
      for (let i = 0; i < varName.length; i++) {
@@ -34,6 +34,34 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
   }
   generateTable();
   setInterval(generateTable, 200);
+
+
+// logs 
+  let tableLogs =  grid.set(5, 4, 6, 8, contrib.table, { 
+    keys: false,
+    fg: 'white',
+    label: 'Logs',
+    interactive: false,
+    columnSpacing: 1,
+    columnWidth: [15,85]
+  });
+  function generateTableLogs() {
+     let data = [];
+     for (let i = 0; i < global.logs.length; i++) {
+       let d = global.logs[i].split('|');
+       let row = [];      
+       row.push(d[0]);
+       row.push(d[1]);
+
+       data.push(row);
+     }
+
+     tableLogs.setData({ headers: ['Time', 'Desc'], data: data });
+
+     screen.render();
+  }
+  generateTableLogs();
+  setInterval(generateTableLogs, 500);
 
 //table ar
   let tableAr =  grid.set(0, 4, 5, 8, contrib.table, { 
@@ -100,6 +128,7 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 screen.on('resize', function() {
   // grid.emit('attach');
   table.emit('attach');
+  tableLogs.emit('attach');
   tableAr.emit('attach');
   netstat.emit('attach');
   lcdDiff.emit('attach');

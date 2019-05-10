@@ -12,10 +12,12 @@ let calcVolt = d3.scaleLinear().domain([0, 1024]).range([0, 5]).clamp(true);
 let relay, poten, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds;
 
 board.on("exit", ()=> {
-  console.log('exit');
+  global.log('Board exit.');
+  // console.log('exit');
 });
 
 board.on("ready", ()=> {
+  global.log('Board ready.');
   relay = {
     enable: new eight.Relay({ pin: 22 }),
     forward: new eight.Relay({ pin: 23 }),
