@@ -1,5 +1,6 @@
 let app = require('./app');
 const calc = require('./utils/calc');
+const func = require('./utils/func');
 const { board, relay, lamp, move, lift, other } = require('./arduino');
 const syss = require('./syss');
 
@@ -31,23 +32,61 @@ setInterval(()=>{
 require('./screen');
 
 setTimeout(()=>{
-	// run();
-	// turn(0, ()=>{});
-},5000);
+	global.var.route = [64, 63, 62, 47, 41, 6 ,40, 42];
+	run(true, ()=>{
+		turn(0, ()=>{
+			global.var.route = [6, 41, 47, 62, 63, 64];
+			run(true, ()=>{
+				offset(46, ()=>{
+					turn(90, ()=>{
+						global.var.route = [43];
+						run(false, ()=>{
+							lift.process(2, ()=>{
+								offset(64, ()=>{
+									turn(180, ()=>{
+										global.var.route = [63, 62, 47, 41, 6 ,40, 42];
+										run(true, ()=>{
+											turn(0, ()=>{
+												global.var.route = [6, 41, 47, 62, 63, 64];
+												run(true, ()=>{
+													offset(46, ()=>{
+														turn(90, ()=>{
+															global.var.route = [43];
+															run(false, ()=>{
+																lift.process(1, ()=>{
+																	
+																});
+															});
+														});
+													});
+												});
+											});
+										});
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	});
+},8000);
 
-let run = ()=>{
+let run = (dir = true, callback)=>{
 	let runInter = setInterval(()=>{
 		if(global.var.route.length == 0){
 			clearInterval(runInter);
 			move.stop();
-			turn(0, ()=>{
-				global.var.route = [6,41,47,62,63,64,65];
-				run();
-			});
+			if(callback){ callback(); }
+			// turn(0, ()=>{
+			// 	global.var.route = [6,41,47,62,63,64,65];
+			// 	run();
+			// });
 		}else if(global.var.route.length > 0){
 			let a = global.var.ar.find(d => d[0] == global.var.route[0]);
 			if(a){
-				if(a[6] == 'F'){
+				if(a[6] == (dir ? 'F' : 'R')){
 					global.var.selDeg = a[5];
 					global.var.pidval = a[5];
 				}else{
@@ -56,16 +95,36 @@ let run = ()=>{
 				if(global.var.route.length == 0){ move.stop(); }
 				else{
 					if(global.var.route.length == 1 && a[4] < 200){
-						move.run(true, 30, true);
+						move.run(dir, 30, true);
 					}else{
-						move.run(true, 100, true);
+						move.run(dir, (dir ? 100 : 50), true);
 					}
 				}
 			}else{
-				move.run(true, 50, false);
+				move.run(dir, (dir ? 60 : 30), false);
 			}
 		}
 	}, 10);
+}
+
+let offset = (no, callblack)=> {
+	global.var.selDeg = 90;
+	let runInter = setInterval(()=>{
+		let a = global.var.ar.find(d => d[0] == no);
+
+		if(a && (global.var.currDeg > 85 || global.var.currDeg < 95)){
+			let l = a[4];
+			if(l > -130){
+				move.run(true, 40, false);
+			}else if(l < -140){
+				move.run(false, 40, false);
+			}else{
+				move.stop();
+				clearInterval(runInter);
+				if(callblack){ callblack }
+			}
+		}
+	}, 20);
 }
 
 let turn = (d, callblack)=>{
@@ -106,6 +165,6 @@ let turn = (d, callblack)=>{
 				}
 			}
 		}
-	}, 20);
+	}, 10);
 }
 

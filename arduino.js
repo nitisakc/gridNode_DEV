@@ -206,10 +206,10 @@ let move = {
 }
 
 let lift = {
-  process: (val)=>{
+  process: (val, callback)=>{
     global.var.liftup = val;
-    if(global.var.liftup == 1){ lift.up(); }
-    else if(global.var.liftup == 2){ lift.down(); }
+    if(global.var.liftup == 1){ lift.up(callback); }
+    else if(global.var.liftup == 2){ lift.down(callback); }
     else{ lift.stop(); }
   },
   up: (callback)=>{
