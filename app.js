@@ -48,8 +48,8 @@ global.log = (msgs)=>{
   if(old != msgs){
     old = msgs;
     let dd = new Date();//dd.getHours()+''+
-    global.logs.push(dd.getMinutes()+'M'+dd.getSeconds()+'S:'+dd.getMilliseconds() + '|' + msgs);
-    if(global.logs.length > 30){
+    global.logs.unshift(dd.getMinutes()+'M'+dd.getSeconds()+'S:'+dd.getMilliseconds() + '|' + msgs);
+    if(global.logs.length > 20){
       global.logs.pop();
     }
   }

@@ -47,7 +47,8 @@ let doJob = ()=>{
 					turn(90, ()=>{
 						global.var.route = [46];
 						run(false, ()=>{
-							// lift.process(2, ()=>{
+							lift.process(2, ()=>{
+								global.log('Lift Down');
 								offset(64, ()=>{
 									turn(180, ()=>{
 										global.var.route = [63, 62, 47, 41, 6 ,40, 42];
@@ -59,13 +60,14 @@ let doJob = ()=>{
 														turn(90, ()=>{
 															global.var.route = [46];
 															run(false, ()=>{
-																// lift.process(1, ()=>{
+																lift.process(1, ()=>{
+																	global.log('Lift Up');
 																	offset(64, ()=>{
 																		turn(180, ()=>{
 																			doJob();
 																		});
 																	});
-																// });
+																});
 															});
 														});
 													});
@@ -74,7 +76,7 @@ let doJob = ()=>{
 										});
 									});
 								});
-							// });
+							});
 						});
 					});
 				});
@@ -143,7 +145,7 @@ let offset = (no, callblack)=> {
 
 		if(a && (global.var.currDeg > 85 || global.var.currDeg < 95)){
 			let l = a[4];
-			if(l > -120){
+			if(l > -130){
 				move.run(true, 50, false);
 			}else if(l < -140){
 				move.run(false, 50, false);

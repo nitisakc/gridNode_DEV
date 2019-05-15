@@ -77,7 +77,7 @@ while True:
 	url = str(objs)
 	if url != old:
 		old = url
-		# r = requests.post('http://localhost:3001/ar/set/', json=objs)
+		r = requests.post('http://localhost:3001/ar/set/', json=objs)
 	# print(objs)
 
 	res = cv2.resize(frame, (int(fw/2), int(fh/2)))

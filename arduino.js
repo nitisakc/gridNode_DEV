@@ -5,7 +5,7 @@ const eight = require("./north-eight.js");
 const board = new five.Board({ repl: false, debug: true });
 
 let calcPoten = d3.scaleLinear().domain([850, 155]).range([0, 180]).clamp(true);
-let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
+let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-15, 15]).clamp(true);
 let calcSpeed = d3.scaleLinear().domain([0, 100]).range([0, 255]).clamp(true);
 let calcVolt = d3.scaleLinear().domain([0, 1024]).range([0, 5]).clamp(true);
 
@@ -212,7 +212,7 @@ let lift = {
     global.var.liftup = val;
     if(global.var.liftup == 1){ lift.up(callback); }
     else if(global.var.liftup == 2){ lift.down(callback); }
-    else{ lift.stop(); }
+    else{ lift.stop();  }
   },
   up: (callback)=>{
     global.var.liftup = 1;
@@ -226,7 +226,7 @@ let lift = {
       }
     }, 100);
   },
-  down: ()=>{
+  down: (callback)=>{
     let co = 0;
     global.var.liftup = 2;
     relay.liftup.off();
