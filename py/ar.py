@@ -80,8 +80,8 @@ while True:
 		r = requests.post('http://localhost:3001/ar/set/', json=objs)
 	# print(objs)
 
-	res = cv2.resize(frame, (int(fw/2), int(fh/2)))
-	cv2.imshow('res',res)
+	# res = cv2.resize(frame, (int(fw/2), int(fh/2)))
+	# cv2.imshow('res',res)
 	# time.sleep(0.05)
 	# sio.emit('img', fh)
 
