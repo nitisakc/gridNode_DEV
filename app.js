@@ -36,6 +36,7 @@ app.set('port', port);
 var server = http.createServer(app);
 server.listen(port);
 
+global.arcount = 0;
 global.syss = pjson.syss;
 global.var = pjson.var;
 // global.log = (msg, type = "log")=>{

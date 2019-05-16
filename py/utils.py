@@ -12,14 +12,14 @@ class WebcamVideoStream:
         self.stream = cv2.VideoCapture(src)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        self.stream.set(cv2.CAP_PROP_EXPOSURE, 0)
+        self.stream.set(cv2.CAP_PROP_EXPOSURE, -1)
         # self.stream.set(cv2.CAP_PROP_BRIGHTNESS, 90)
         # print(self.stream.get(cv2.CAP_PROP_EXPOSURE))
         self.width = width
         self.height = height
         self.sleep = sleep
-        # command ="v4l2-ctl -d 0 -c auto_exposure=1 -c exposure_time_absolute=100"
-        # op = subprocess.call(command, shell=True)
+        command ="v4l2-ctl -d 0 -c auto_exposure=1 -c exposure_time_absolute=100"
+        op = subprocess.call(command, shell=True)
 
         (self.grabbed, self.frame) = self.stream.read()
         # self.frame = cv2.resize(frame, (self.width, self.height))

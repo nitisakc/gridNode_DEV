@@ -10,7 +10,7 @@ import json
 import requests
 from utils import WebcamVideoStream
 
-cap = WebcamVideoStream(src=0, width=1920, height=1080).start()
+cap = WebcamVideoStream(src=0, width=1280, height=720).start()
 aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_100)
 parameters =  aruco.DetectorParameters_create()
 
@@ -29,7 +29,10 @@ def PolygonArea(c):
 old = ''
 while True:
 	frame = cap.read()
-	frame = frame[0:1080, 100:1520]
+	# frame = frame[0:1080, 100:1520]
+	# frame = cv2.rotate(frame, rotateCode = 0)
+	frame = frame[0:1080, 100:1180]
+	frame = cv2.rotate(frame, rotateCode = 0)
 	fh, fw, _ = frame.shape
 	cx, cy = int(fw/2), int(fh/2)
 

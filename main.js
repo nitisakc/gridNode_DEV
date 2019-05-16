@@ -36,6 +36,27 @@ require('./screen');
 
 let degNow = 90;
 
+
+let doJob2 = ()=>{
+	global.log('Start Job');
+	let l = 1;
+	l = (l == 1 ? 2 : 1);
+	offset(46, ()=>{
+		turn(90, ()=>{
+			global.var.route = [46];
+			run(false, ()=>{
+				lift.process(l, ()=>{
+					offset(64, ()=>{
+						turn(0, ()=>{
+							doJob2();
+						});
+					});
+				});
+			});
+		});
+	});
+}
+
 let doJob = ()=>{
 	global.log('Start Job');
 	global.var.route = [63, 62, 47, 41, 6 ,40, 42];
@@ -107,7 +128,7 @@ let run = (dir = true, callback)=>{
 			let a = global.var.ar.find(d => d[0] == global.var.route[0]);
 			if(a){
 				if(dir){
-					if(a[6] == 'F' && a[4] > 10){
+					if(a[6] == 'F' && a[4] > 20){
 						global.var.selDeg = a[5];
 						global.var.pidval = a[5];
 					}else{
