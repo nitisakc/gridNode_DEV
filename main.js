@@ -34,21 +34,27 @@ setInterval(()=>{
 
 require('./screen');
 
-let degNow = 90;
+let degNow = 180;
 
 
+let l = 1;
 let doJob2 = ()=>{
 	global.log('Start Job');
-	let l = 1;
 	l = (l == 1 ? 2 : 1);
-	offset(46, ()=>{
-		turn(90, ()=>{
-			global.var.route = [46];
-			run(false, ()=>{
-				lift.process(l, ()=>{
-					offset(64, ()=>{
-						turn(0, ()=>{
-							doJob2();
+	global.var.route = [63];
+	run(true, ()=>{
+		turn(0, ()=>{
+			offset(46, ()=>{
+				turn(90, ()=>{
+					global.var.route = [46];
+					run(false, ()=>{
+						lift.process(l, ()=>{
+							global.log('Lift ' + l);
+							offset(64, ()=>{
+								turn(180, ()=>{
+									doJob2();
+								});
+							});
 						});
 					});
 				});
@@ -110,7 +116,7 @@ let doJob = ()=>{
 // err = 90 + (currDeg - degNow);
 
 setTimeout(()=>{
-	// doJob();
+	doJob2();
 	// global.var.route = [46];
 		// run(false, ()=>{});
 },8000);
@@ -128,14 +134,14 @@ let run = (dir = true, callback)=>{
 			let a = global.var.ar.find(d => d[0] == global.var.route[0]);
 			if(a){
 				if(dir){
-					if(a[6] == 'F' && a[4] > 20){
+					if(a[6] == 'F' && a[4] > 15){
 						global.var.selDeg = a[5];
 						global.var.pidval = a[5];
 					}else{
 						global.var.route.shift()
 					}
 				}else{
-					if(a[4] < 20){
+					if(a[4] < 15){
 						global.var.selDeg = 90 + (a[2] - degNow);//calcErr(a[5]);
 						global.var.pidval = 90 + (a[2] - degNow);//calcErr(a[5]);
 					}else{
@@ -145,13 +151,16 @@ let run = (dir = true, callback)=>{
 				
 				if(global.var.route.length == 0){ move.stop(); }
 				else{
-					if(global.var.route.length == 1 && a[4] < 200){
+					if(global.var.route.length == 1 && Math.abs(a[4]) < 200){
 						move.run(dir, 30, true);
 					}else{
 						move.run(dir, (dir ? 100 : 80), true);
 					}
 				}
 			}else{
+				if(global.var.ar.length > 0){
+					global.var.selDeg = 90 + (global.var.ar[0][2] - degNow);
+				}
 				move.run(dir, (dir ? 60 : 40), false);
 			}
 		}
@@ -163,6 +172,11 @@ let offset = (no, callblack)=> {
 	global.log('Run Offset ' + no);
 	let runInter = setInterval(()=>{
 		let a = global.var.ar.find(d => d[0] == no);
+		if(a){
+			global.var.selDeg = 90 + (a[2] - degNow);
+		}else if(global.var.ar.length > 0){
+			global.var.selDeg = 90 + (global.var.ar[0][2] - degNow);
+		}
 
 		if(a && (global.var.currDeg > 85 || global.var.currDeg < 95)){
 			let l = a[4];
@@ -186,6 +200,7 @@ let turn = (d, callblack)=>{
 	let turnInter = setInterval(()=>{
 		if(global.var.ar.length > 0){
 			let z = d;
+			z = (z == 180 ? 170 : z);
 			let currDeg = global.var.ar[0][2];
 			currDeg = currDeg < 0 ? 360 + currDeg : currDeg;
 			let diff = currDeg - z; 
