@@ -116,7 +116,7 @@ let doJob = ()=>{
 // err = 90 + (currDeg - degNow);
 
 setTimeout(()=>{
-	doJob2();
+	// doJob2();
 	// global.var.route = [46];
 		// run(false, ()=>{});
 },8000);

@@ -1,0 +1,84 @@
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+svg{
+	min-height: 100%;
+}
+.axis path {
+  display: none;
+}
+
+.axis line {
+  stroke-opacity: 0.3;
+  shape-rendering: crispEdges;
+}
+
+.view {
+  fill: url(#gradient);
+  stroke: #000;
+}
+
+button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+.label{
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  background: '#FFF';
+  padding: 3px;
+}
+.cars-panel{
+	position: fixed;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	height: 18%;
+	background-color: #FFF;
+	box-shadow: 0px -4px 3px rgba(50, 50, 50, 0.55);
+	/*border-top: 1px solid #000;*/
+}
+.cars-panel .car{
+	/*background-color: red;*/
+	height: 100%;
+	border-right: 1px solid rgba(50, 50, 50, 0.55);
+	padding: 0px;
+}
+.cars-panel .car.offline{
+	opacity: 0.4;
+}
+.cars-panel .car-img{
+	width: 65%;
+	margin: -8% 5%;
+}
+.cars-panel span.name{
+	margin: 2px 10px;
+}
+.cars-panel .batt{
+	position: absolute;
+	top: 0px;
+	right: 3px;
+}
+.cars-panel .batt i{
+	font-size: 1.5em;
+}
+.cars-panel .batt i.fa-battery-full, .cars-panel .batt i.fa-battery-three-quarters{ color: green; }
+.cars-panel .batt i.fa-battery-half{ color: #f4c141; }
+.cars-panel .batt i.fa-battery-quarter{ color: red; }
+.cars-panel .batt span{
+	position: absolute;
+	top: 4px;
+	right: 32px;
+	font-size: 0.1em;
+}
+.cars-panel .pos{
+	position: absolute;
+	top: 28px;
+	right: 1px;
+	font-size: 0.8em
+}

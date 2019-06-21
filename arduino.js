@@ -2,7 +2,7 @@ const five = require("johnny-five");
 const d3 = require("d3-scale");
 const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
-const board = new five.Board({ repl: false, debug: true });
+const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
 
 let calcPoten = d3.scaleLinear().domain([850, 155]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-15, 15]).clamp(true);
@@ -135,7 +135,11 @@ let move = {
   run: (fw, spd, pid = false)=>{
     move.pid(pid); 
     move.dir(fw);
-    move.en();
+    if(global.var.safety.on && global.var.safety.danger > 0){
+      move.stop();
+    }else{
+      move.en();
+    }
     move.speed(spd);
   },
   pid: (onoff = true)=>{
@@ -178,7 +182,11 @@ let move = {
     global.var.dir = 0;
   },
   speed: (val)=>{
-    global.var.selSpd = val;
+    if(global.var.safety.on && global.var.safety.warning > 0){
+      val = parseInt(val / 1.5);
+      val = val < 30 ? 30 : val;
+    }
+    global.var.selSpd = global.var.safety.on && global.var.safety.danger > 0 ? 0 : val;
   },
   accel: ()=>{
     let s = global.var.selSpd - global.var.currSpd;

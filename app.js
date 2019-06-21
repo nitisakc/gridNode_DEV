@@ -6,6 +6,10 @@ const bodyParser = require('body-parser');
 const http = require('http');
 const pjson = require('./package.json');
 
+global.arcount = 0;
+global.syss = pjson.syss;
+global.var = pjson.var;
+
 var ArgumentParser = require('argparse').ArgumentParser;
 var parser = new ArgumentParser();
 parser.addArgument([ '-p', '--port' ], { defaultValue: pjson.port, required: false, type: 'string' });
@@ -13,6 +17,7 @@ var args = parser.parseArgs();
 
 const index = require('./routes/index');
 const ar = require('./routes/ar');
+const safety = require('./routes/safety');
 
 let app = express();
 
@@ -30,15 +35,13 @@ app.use(function(req, res, next) {
 
 app.use('/', index);
 app.use('/ar', ar);
+app.use('/safety', safety);
 
 const port = args.port;
 app.set('port', port);
 var server = http.createServer(app);
 server.listen(port);
 
-global.arcount = 0;
-global.syss = pjson.syss;
-global.var = pjson.var;
 // global.log = (msg, type = "log")=>{
 // 	global.var.logs.unshift({ msg: msg, type: type, time: new Date() });
 // 	if(global.var.logs.length > 20) global.var.logs.pop();
