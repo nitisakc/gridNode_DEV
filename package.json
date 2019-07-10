@@ -75,7 +75,7 @@
     "liftpos": 0,
     "liftup": 0,
     "safety": {
-      "on": false,
+      "on": true,
       "l": [],
       "r": [],
       "display": {

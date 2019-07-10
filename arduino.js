@@ -4,7 +4,8 @@ const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
 const SerialPort = require('serialport');
 
-const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
+// const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
+const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
 
 let calcPoten = d3.scaleLinear().domain([850, 155]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
@@ -95,23 +96,23 @@ board.on("ready", ()=> {
 	// liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
-    if(global.var.safety.on && global.var.safety.danger > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
-      relay.safety.on(); 
-      global.var.selSpd = 0;
-      safetyLast = true;
-      lampStatus.safetyStart();
-    }else{
-      if(safetyLast){
-        setTimeout(()=>{
-          relay.safety.off(); 
-          lampStatus.safetyStop();
-        }, 2000)
-      }
-      safetyLast = false;
-    }
+    // if(global.var.safety.on && global.var.safety.danger > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
+    //   relay.safety.on(); 
+    //   global.var.selSpd = 0;
+    //   safetyLast = true;
+    //   lampStatus.safetyStart();
+    // }else if(global.var.safety.on){
+    //   if(safetyLast){
+    //     setTimeout(()=>{
+    //       relay.safety.off(); 
+    //       lampStatus.safetyStop();
+    //     }, 2000)
+    //   }
+    //   safetyLast = false;
+    // }
     move.accel();
 
-    if(lampStatus.safetyInter == false){
+    if(lampStatus.safety == false){
       if(global.var.en && global.var.dir != 0){
         if(Math.abs(global.var.diffDeg) > 30){
           lampStatus.danger();
@@ -212,10 +213,10 @@ let move = {
     global.var.dir = 0;
   },
   speed: (val)=>{
-    if(global.var.safety.on && global.var.safety.warning > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
-      val = parseInt(val / 1.5);
-      val = val < 30 ? 30 : val;
-    }
+    // if(global.var.safety.on && global.var.safety.warning > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
+    //   val = parseInt(val / 1.5);
+    //   val = val < 30 ? 30 : val;
+    // }
 
     global.var.selSpd = val;
   },

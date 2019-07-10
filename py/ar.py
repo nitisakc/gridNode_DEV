@@ -10,7 +10,7 @@ import json
 import requests
 from utils import WebcamVideoStream
 
-cap = WebcamVideoStream(src=1, width=1280, height=720).start()
+cap = WebcamVideoStream(src=0, width=1280, height=720).start()
 aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_100)
 parameters =  aruco.DetectorParameters_create()
 
@@ -84,8 +84,8 @@ while True:
 		r = requests.post('http://localhost:3001/ar/set/', json=objs)
 	# print(objs)
 
-	res = cv2.resize(frame, (int(fw/1.5), int(fh/1.5)))
-	cv2.imshow('res',res)
+	# res = cv2.resize(frame, (int(fw/1.5), int(fh/1.5)))
+	# cv2.imshow('res',res)
 	# time.sleep(0.05)
 	# sio.emit('img', fh)
 

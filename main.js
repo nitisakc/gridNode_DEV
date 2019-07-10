@@ -171,6 +171,7 @@ let doJob6 = ()=>{
 	});
 }
 
+let lflag = true;
 let doJob7 = ()=>{
 	degNow = 180;
 	global.log('Start Job');
@@ -178,21 +179,26 @@ let doJob7 = ()=>{
 	run(true, ()=>{
 		global.var.route = [8, 13, 7, 10, 14];
 		run(false, ()=>{
-			global.var.route = [7, 13, 8];
-			run(true, ()=>{
-				turn(270, ()=>{
-					global.var.route = [16];
-					run(true, ()=>{
-						turn(0, ()=>{
-							global.var.route = [33, 12, 23, 35, 24, 21];
-							run(true, ()=>{
-								turn(180, ()=>{
-									doJob7();
-								}, true);
-							});
-						}, true);
-					});
-				}, true);
+			lift.process(lflag ? 2 : 1, ()=>{
+				lflag = !lflag;
+				global.var.route = [7, 13, 26, 38];
+				run(true, ()=>{
+					turn(0, ()=>{
+						global.var.route = [8];
+						run(true, ()=>{
+						// global.var.route = [26, 38];//[16];
+						// run(true, ()=>{
+							// turn(0, ()=>{
+								global.var.route = [25, 33, 12, 23, 35, 24, 21];
+								run(true, ()=>{
+									turn(180, ()=>{
+										doJob7();
+									}, true);
+								});
+							// }, true);
+						});
+					}, true);
+				});
 			});
 		});
 	});
@@ -257,12 +263,12 @@ let run = (dir = true, callback)=>{
 				if(global.var.route.length == 0){ move.stop(); }
 				else{
 					if(global.var.route.length == 1 && Math.abs(a[4]) < 400){
-						if(global.var.route[0] == 38 || global.var.route[0] == 16){ move.run(dir, (dir ? 60 : 40), true); }
+						if(global.var.route[0] == 38 || global.var.route[0] == 16){ move.run(dir, (dir ? 60 : 50), true); }
 						else{
 							move.run(dir, 30, true);
 						}
 					}else{
-						if(global.var.route[0] == 26 || global.var.route[0] == 38){ move.run(dir, (dir ? 60 : 40), true); }
+						if(global.var.route[0] == 26 || global.var.route[0] == 38){ move.run(dir, (dir ? 60 : 50), true); }
 						else{ move.run(dir, (dir ? 100 : 60), true); }
 					}
 				}
