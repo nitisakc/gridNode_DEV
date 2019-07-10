@@ -15,8 +15,8 @@ for line in cams.splitlines():
 	port = l
 
 lidar = RPLidar(port)
-lid = 'EAC49AF2C1EA9FC3BEEB9CF365173203'
-rid = '94E89AF2C1EA9FC3BEEB9CF31B3B3203'
+lid = 'E9EA9AF2C1EA9FC3BEEB9CF366393203' #'EAC49AF2C1EA9FC3BEEB9CF365173203'
+rid = 'D39C9AF2C1EA9FC0BEEB9CF35C4F3200' #'94E89AF2C1EA9FC3BEEB9CF31B3B3203'
 
 try:
 	data = [-1] * 360
@@ -42,8 +42,8 @@ try:
 				i = 0
 				# line = [[int(v[1]), int(v[2] / 10)] for v in scan]
 				for v in scan:
-					if int(v[2] / 10) <= 200:
-						line.append([int(v[1]), int(v[2] / 10)])
+					if int(v[2] / 10) <= 200 and int(v[1]) > 177 or int(v[1]) < 80:
+						line.append([int(v[1]), int(v[2] / 10) + 2])
 				# print(line)
 				# sys.stdout.flush()
 				r = requests.post('http://localhost:3001/safety/set/' + side , json=line)

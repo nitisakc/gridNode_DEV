@@ -9,7 +9,7 @@ router.post('/set', function(req, res, next) {
 	}
 	if(body.length > 0 || global.arcount > 10){
 		global.var.ar = body;
-		global.var.ar.sort((a,b) => (a[0] > b[0]));
+		global.var.ar.sort((a,b) => (a[1] > b[1]));
 	}
 
 	res.send(200);

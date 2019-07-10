@@ -2,14 +2,16 @@ const five = require("johnny-five");
 const d3 = require("d3-scale");
 const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
+const SerialPort = require('serialport');
+
 const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
 
 let calcPoten = d3.scaleLinear().domain([850, 155]).range([0, 180]).clamp(true);
-let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-15, 15]).clamp(true);
+let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
 let calcSpeed = d3.scaleLinear().domain([0, 100]).range([0, 255]).clamp(true);
 let calcVolt = d3.scaleLinear().domain([0, 1024]).range([0, 5]).clamp(true);
 
-let relay, poten, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds;
+let relay, poten, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds, safetyLast = false;
 
 board.on("exit", ()=> {
   global.log('Board exit.');
@@ -26,8 +28,11 @@ board.on("ready", ()=> {
     liftup: new eight.Relay({ pin: 26 }),
     liftdown: new eight.Relay({ pin: 27 }),
     brake: new eight.Relay({ pin: 28 }),
-    emg: new eight.Relay({ pin: 29 })
+    safety: new eight.Relay({ pin: 29 })
   };
+
+
+  // relay.safety.on(); 
 
   global.lamp = lamp = {
     r: new five.Led({ pin: 34 }),
@@ -38,10 +43,6 @@ board.on("ready", ()=> {
   };
 
   motors        = new five.Motor(4); 
-  // motors        = new five.Pin({
-  //   pin: 4,
-  //   mode: five.Pin.PWM
-  // });
   
   trunMotor     = new eight.BTS7960(45, 47, 44, 46); //use en 45 only
 	poten 			  = new five.Sensor({ pin: "A5", freq: 120 });
@@ -51,8 +52,8 @@ board.on("ready", ()=> {
   rds = [ new five.Proximity({ controller: "GP2Y0A02YK0F", pin: "A4" }),
           new five.Proximity({ controller: "GP2Y0A02YK0F", pin: "A7" }) ];
 
-  rds[0].on("data", function() { global.var.rds[0] = this.cm; });
-  rds[1].on("data", function() { global.var.rds[1] = this.cm; });
+  // rds[0].on("data", function() { global.var.rds[0] = this.cm; });
+  // rds[1].on("data", function() { global.var.rds[1] = this.cm; });
 
   liftp.on("data", function() {
     // console.dir(calcVolt(this.value)); 
@@ -72,9 +73,9 @@ board.on("ready", ()=> {
     let diff = sdeg - global.var.currDeg;
     global.var.diffDeg = (diff).toFixed(0);//calcDiff(diff).toFixed(0);
     let d = calcDiff(diff).toFixed(0);
-    if(d < 0){
+    if(d < -1){
       trunMotor.lift(255);
-    }else if(d > 0){
+    }else if(d > 1){
       trunMotor.right(255);
     }else{
       trunMotor.stop();
@@ -94,17 +95,32 @@ board.on("ready", ()=> {
 	// liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
-    // trunMotor.right(180);
+    if(global.var.safety.on && global.var.safety.danger > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
+      relay.safety.on(); 
+      global.var.selSpd = 0;
+      safetyLast = true;
+      lampStatus.safetyStart();
+    }else{
+      if(safetyLast){
+        setTimeout(()=>{
+          relay.safety.off(); 
+          lampStatus.safetyStop();
+        }, 2000)
+      }
+      safetyLast = false;
+    }
     move.accel();
 
-    if(global.var.en && global.var.dir != 0){
-      if(Math.abs(global.var.diffDeg) > 30){
-        lampStatus.danger();
+    if(lampStatus.safetyInter == false){
+      if(global.var.en && global.var.dir != 0){
+        if(Math.abs(global.var.diffDeg) > 30){
+          lampStatus.danger();
+        }else{
+          lampStatus.warning();
+        }
       }else{
-        lampStatus.warning();
+        lampStatus.standby();
       }
-    }else{
-      lampStatus.standby();
     }
 	});
 
@@ -114,6 +130,20 @@ board.on("ready", ()=> {
 });
 
 let lampStatus = {
+  safety: false,
+  safetyStart: ()=>{
+    lampStatus.safety = true;
+    lamp.r.blink(250);
+    setTimeout(()=>{
+      lamp.o.blink();
+    }, 250);
+    lamp.g.off();
+  },
+  safetyStop: ()=>{
+    lampStatus.safety = false;
+    lamp.r.off();
+    lamp.o.off();
+  },
   danger: ()=>{
     lamp.r.on();
     lamp.o.off();
@@ -135,24 +165,24 @@ let move = {
   run: (fw, spd, pid = false)=>{
     move.pid(pid); 
     move.dir(fw);
-    if(global.var.safety.on && global.var.safety.danger > 0){
-      move.stop();
-    }else{
-      move.en();
-    }
+    // if(global.var.safety.on && global.var.safety.danger > 0){
+    //   move.stop();
+    // }else{
+    move.en();
+    // }
     move.speed(spd);
   },
   pid: (onoff = true)=>{
     global.var.pidon = onoff; 
   },
   en: (flag = true)=>{
-    if(flag){ 
+    if(flag && lampStatus.safety == false){ 
       // if(global.var.dir != 0){
         global.var.en = true; 
         relay.enable.on(); 
         relay.brake.on(); 
         // relay.emg.on(); 
-      // }
+      // } 
     }
     else{ 
       global.var.en = false; 
@@ -182,11 +212,12 @@ let move = {
     global.var.dir = 0;
   },
   speed: (val)=>{
-    if(global.var.safety.on && global.var.safety.warning > 0){
+    if(global.var.safety.on && global.var.safety.warning > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
       val = parseInt(val / 1.5);
       val = val < 30 ? 30 : val;
     }
-    global.var.selSpd = global.var.safety.on && global.var.safety.danger > 0 ? 0 : val;
+
+    global.var.selSpd = val;
   },
   accel: ()=>{
     let s = global.var.selSpd - global.var.currSpd;

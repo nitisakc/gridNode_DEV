@@ -1,5 +1,10 @@
 var express = require('express');
+const d3 = require("d3-scale");
 var router = express.Router();
+
+let calcDeg = d3.scaleLinear().domain([40, 140]).range([-40, 40]).clamp(true);
+let calcSpd = d3.scaleLinear().domain([0, 100]).range([30, 80]).clamp(true);
+let calcRedSpd = d3.scaleLinear().domain([5, 40]).range([1.0, 0.5]).clamp(true);
 
 router.get('/', function(req, res, next) {
   res.sendfile('www/safety.html');
@@ -7,13 +12,13 @@ router.get('/', function(req, res, next) {
 
 let startx = 200, 
 	starty = 200,
-	height = 50,
-	width = 120,
-	angle = -0,
+	height = 70,
+	width = 106,
+	angle = -11,
 	warning = 140
-	offset = 90,
+	offset = 82,
 	center = width / 2,
-	varea = 5,
+	varea = 12,
 	padding = (width - offset) / 2,
 	rplr = [startx+padding, starty],
 	rpll = [startx+padding+offset, starty];
@@ -35,20 +40,42 @@ let isPip = (point, vs)=>{
 };
 
 let calc = ()=>{
+	// global.var.currSpd = 100;
+	height = calcSpd(global.var.currSpd);//.toFixed(0);
+	warning = height * 2;
+	angle = calcDeg(global.var.selDeg);
+	let heightRed = height * calcRedSpd(Math.abs(angle));
+	let warningRed = warning * calcRedSpd(Math.abs(angle));
+
 	global.var.safety.display.yelArea = [
 		[startx - padding, starty],
-		[startx + angle - padding, starty - warning],
-		[startx + width + angle + padding, starty - warning],
+		[startx + angle - padding, starty - warningRed],
+		[startx + width + angle + padding, starty - warningRed],
 		[startx + width + padding, starty],
 		[startx + center, starty - varea]
 	];    
 	global.var.safety.display.redArea = [
 		[startx, starty],
-		[startx + angle, starty - height],
-		[startx + width + angle, starty - height],
+		// [startx, starty],
+		[startx + angle, starty - (angle > 5 ? height : heightRed) + (angle/2)],
+		[startx + width + angle, starty - (angle < -5 ? height : heightRed) - (angle/2)],
 		[startx + width, starty],
 		[startx + center, starty - varea]
 	];
+
+	if(angle < -5){
+		global.var.safety.display.redArea.splice(1, 0, [startx - 5, starty + 80]);
+	}else if(angle > 5){
+		global.var.safety.display.redArea.splice(3, 0, [startx + width + 5, starty + 80]);
+	}
+
+	// global.var.safety.display.redArea = [
+	// 	[startx + width + 20, starty - 30],
+	// 	[startx + width + 20, starty + 150],
+	// 	[startx + width + 170, starty + 150],
+	// 	[startx + width + 150, starty + 20],
+	// 	[startx + width + 85, starty - 15]
+	// ];
 
 	let w = 0, d = 0;
 	global.var.safety.display.rplr = rplr;
@@ -74,7 +101,7 @@ let calc = ()=>{
 
 	setTimeout(()=>{
 		calc();
-	},200);
+	},150);
 }
 
 let addPoint = (raw, off = 0)=>{
@@ -85,7 +112,8 @@ let addPoint = (raw, off = 0)=>{
 	let len = Math.sqrt(Math.pow(x - rpll[0], 2) + Math.pow(y - rpll[1], 2));
 	if(len <= 200){
 		yel = isPip([x, y], global.var.safety.display.yelArea);
-		if(yel){ red = isPip([x, y], global.var.safety.display.redArea); }
+		red = isPip([x, y], global.var.safety.display.redArea);
+		// if(yel){ red = isPip([x, y], global.var.safety.display.redArea); }
 	}
 
 	return [x, y, yel, red];

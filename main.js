@@ -115,10 +115,108 @@ let doJob = ()=>{
 // err = currDeg - degNow
 // err = 90 + (currDeg - degNow);
 
+let doJob3 = ()=>{
+	degNow = 0;
+	global.var.route = [11, 9];
+	run(false, ()=>{
+		global.var.route = [15];
+		run(true, ()=>{
+			doJob3();
+		});
+	});
+}
+
+let doJob4 = ()=>{
+	global.log('Start Job');
+	global.var.route = [63, 62, 47, 41, 6 ,40, 42]; //[64, 63, 62, 47];//
+	run(true, ()=>{
+		turn(0, ()=>{
+			global.var.route = [6, 41, 47, 62, 63, 64];//[62, 63, 64, 65]; //
+			run(true, ()=>{
+				turn(180, ()=>{
+					doJob4();
+				});
+			});
+		});
+	});
+}
+
+let doJob5 = ()=>{
+	global.log('Start Job');
+	global.var.route = [63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35]; //[64, 63, 62, 47];//
+	// lift.process(1, ()=>{
+		run(true, ()=>{
+			turn(0, ()=>{
+				global.var.route = [21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 6, 41, 47, 62, 63, 64]; //[64, 63, 62, 47];//
+				// lift.process(1, ()=>{
+					run(true, ()=>{
+						turn(180, ()=>{
+							doJob5();
+						});
+					});
+				// });
+			}, true);
+		});
+	// });
+}
+
+let doJob6 = ()=>{
+	degNow = 0;
+	global.log('Start Job');
+	global.var.route = [21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 6, 41, 47, 62, 63, 64]; //[64, 63, 62, 47];//
+	run(true, ()=>{
+		turn(180, ()=>{
+			
+		});
+	});
+}
+
+let doJob7 = ()=>{
+	degNow = 180;
+	global.log('Start Job');
+	global.var.route = [35, 23, 12, 33, 25, 26, 38]; //[64, 63, 62, 47];//
+	run(true, ()=>{
+		global.var.route = [8, 13, 7, 10, 14];
+		run(false, ()=>{
+			global.var.route = [7, 13, 8];
+			run(true, ()=>{
+				turn(270, ()=>{
+					global.var.route = [16];
+					run(true, ()=>{
+						turn(0, ()=>{
+							global.var.route = [33, 12, 23, 35, 24, 21];
+							run(true, ()=>{
+								turn(180, ()=>{
+									doJob7();
+								}, true);
+							});
+						}, true);
+					});
+				}, true);
+			});
+		});
+	});
+}
+
+let doJob8 = ()=>{
+	global.log('Start Job');
+	global.var.route = [63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24]; 
+	run(true, ()=>{
+		doJob7();
+	});
+}
+
 setTimeout(()=>{
-	// doJob2();
+	// doJob5();
+	// doJob6();
+	// doJob7();
+	//doJob8();
+	// turn(0, ()=>{
+
+	// }, true);
 	// global.var.route = [46];
 		// run(false, ()=>{});
+	
 },8000);
 
 let run = (dir = true, callback)=>{
@@ -130,6 +228,7 @@ let run = (dir = true, callback)=>{
 			global.log('Route 0');
 			if(callback){ callback(); }
 		}else if(global.var.route.length > 0){
+			if(global.var.route[0] == 26 || global.var.route[0] == 38){}
 			global.log('Go to number ' + global.var.route[0]);
 			let a = global.var.ar.find(d => d[0] == global.var.route[0]);
 			if(a){
@@ -137,13 +236,19 @@ let run = (dir = true, callback)=>{
 					if(a[6] == 'F' && a[4] > 15){
 						global.var.selDeg = a[5];
 						global.var.pidval = a[5];
+						if(global.var.route.length > 1 && a[4] < 80){
+							global.var.route.shift();
+						}
 					}else{
 						global.var.route.shift()
 					}
 				}else{
-					if(a[4] < 15){
-						global.var.selDeg = 90 + (a[2] - degNow);//calcErr(a[5]);
-						global.var.pidval = 90 + (a[2] - degNow);//calcErr(a[5]);
+					if(a[4] < -140){
+						global.var.selDeg = parseInt(90 + (a[3] / 3));//a[9];//90 + (a[2] - degNow);//calcErr(a[5]);
+						global.var.pidval = parseInt(90 + (a[3] / 3));//a[9];//90 + (a[2] - degNow);//calcErr(a[5]);
+					// }else if(a[4] >= -120 && a[4] < 0){
+					// 	global.var.selDeg = 180 - a[5];//90 + (a[2] - degNow);//calcErr(a[5]);
+					// 	global.var.pidval = 180 - a[5];//90 + (a[2] - degNow);//calcErr(a[5]);
 					}else{
 						global.var.route.shift()
 					} 
@@ -151,20 +256,29 @@ let run = (dir = true, callback)=>{
 				
 				if(global.var.route.length == 0){ move.stop(); }
 				else{
-					if(global.var.route.length == 1 && Math.abs(a[4]) < 200){
-						move.run(dir, 30, true);
+					if(global.var.route.length == 1 && Math.abs(a[4]) < 400){
+						if(global.var.route[0] == 38 || global.var.route[0] == 16){ move.run(dir, (dir ? 60 : 40), true); }
+						else{
+							move.run(dir, 30, true);
+						}
 					}else{
-						move.run(dir, (dir ? 100 : 80), true);
+						if(global.var.route[0] == 26 || global.var.route[0] == 38){ move.run(dir, (dir ? 60 : 40), true); }
+						else{ move.run(dir, (dir ? 100 : 60), true); }
 					}
 				}
 			}else{
-				if(global.var.ar.length > 0){
-					global.var.selDeg = 90 + (global.var.ar[0][2] - degNow);
-				}
+				// if(global.var.ar.length > 0){
+				// 	if(dir){
+				// 		global.var.selDeg = 90 + (global.var.ar[0][2] - degNow);
+				// 	}else{
+				// 		global.var.selDeg = 90 + (global.var.ar[0][3] / 10);
+				// 	}
+				// }
+				global.log('AR 0');
 				move.run(dir, (dir ? 60 : 40), false);
 			}
 		}
-	}, 10);
+	}, 20);
 }
 
 let offset = (no, callblack)=> {
@@ -194,31 +308,36 @@ let offset = (no, callblack)=> {
 	}, 20);
 }
 
-let turn = (d, callblack)=>{
+let turn = (d, callblack, rd = null)=>{
 	global.log('Turning ' + d);
 	let turnFlag = true;
 	let turnInter = setInterval(()=>{
 		if(global.var.ar.length > 0){
-			let z = d;
-			z = (z == 180 ? 170 : z);
+			let z = (rd == true && d == 0 ? 359 : d);
+			// z = (z == 180 ? 170 : z);
 			let currDeg = global.var.ar[0][2];
 			currDeg = currDeg < 0 ? 360 + currDeg : currDeg;
 			let diff = currDeg - z; 
 
 			let dir = z - calc.absDeg(currDeg);
+			let tr = 180, tl = 0;
 
 			if(Math.abs(diff) > 1){
 				if(dir >= 0 && turnFlag){ 
-    				global.var.selDeg = 180;
+    				global.var.selDeg = tr;
 				}
 				else if(dir < 0 && turnFlag){ 
-    				global.var.selDeg = 1;
+    				global.var.selDeg = tl;
+				}
+
+				if(rd != null){
+					global.var.selDeg = rd ? tr : tl;
 				}
 				
-				if((global.var.selDeg == 180 && global.var.currDeg > 175) || (global.var.selDeg == 1 && global.var.currDeg < 5)){
+				if((global.var.selDeg == tr && (rd == true ? global.var.currDeg < 349 : (global.var.currDeg > (tr - 5)))) || (global.var.selDeg == tl && global.var.currDeg < (tl + 5))){
 					turnFlag = false;
 					if(Math.abs(diff) > 40){
-						move.run(true, 80);
+						move.run(true, 70);
 					}else{
 						move.run(true, 25);
 					}
@@ -228,10 +347,10 @@ let turn = (d, callblack)=>{
     			move.stop();
 				if(global.var.currDeg < 92 || global.var.currDeg > 88){
 					clearInterval(turnInter);
-					// func.wait(1000, ()=>{
+					func.wait(200, ()=>{
 						global.log('Turn ' + d );
 						callblack();
-					// });
+					});
 				}
 			}
 		}

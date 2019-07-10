@@ -70,12 +70,12 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
     label: 'AR Vision',
     interactive: false,
     columnSpacing: 1,
-    columnWidth: [8, 8, 8, 8, 8, 8, 8, 8, 8]
+    columnWidth: [8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
   });
   function generateTableAr() {
      let data = [];
      // tableAr.setData({ headers: ['ID', 'Len', 'Deg', 'XL', 'YL', 'Err', 'Zone', 'X', 'Y'], data: [[0, 0, 0, 0, 0, 0, 0, 0, 0]] });
-     tableAr.setData({ headers: ['ID', 'Len', 'Deg', 'XL', 'YL', 'Err', 'Zone', 'X', 'Y'], data: global.var.ar });
+     tableAr.setData({ headers: ['ID', 'Len', 'Deg', 'XL', 'YL', 'Err', 'Zone', 'X', 'Y', 'bErr'], data: global.var.ar });
      screen.render();
   }
   generateTableAr();
