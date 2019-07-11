@@ -12,7 +12,7 @@ let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
 let calcSpeed = d3.scaleLinear().domain([0, 100]).range([0, 255]).clamp(true);
 let calcVolt = d3.scaleLinear().domain([0, 1024]).range([0, 5]).clamp(true);
 
-let relay, poten, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds, safetyLast = false;
+let relay, poten, reset, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds, safetyLast = false;
 
 board.on("exit", ()=> {
   global.log('Board exit.');
@@ -48,6 +48,7 @@ board.on("ready", ()=> {
   trunMotor     = new eight.BTS7960(45, 47, 44, 46); //use en 45 only
 	poten 			  = new five.Sensor({ pin: "A5", freq: 120 });
   liftp         = new five.Sensor({ pin: "A6", freq: 120 });
+  reset         = new five.Button({ pin: 8, isPullup: true });
 	liftPosUp 		= new five.Button({ pin: 6, isPullup: true });
 	liftPosDown 	= new five.Button({ pin: 7, isPullup: true });
   rds = [ new five.Proximity({ controller: "GP2Y0A02YK0F", pin: "A4" }),
@@ -83,6 +84,16 @@ board.on("ready", ()=> {
     }
   });
 
+  reset.on("down",  ()=> { 
+    global.var.en = false; 
+    relay.enable.off(); 
+    relay.brake.off(); 
+    
+    global.var.currSpd = 0;
+    global.var.selSpd = 0;
+    motors.stop();
+  });
+
 	// liftPosUp.on("down", 	()=> { 
  //    global.var.liftpos = 1; 
  //    global.var.liftup = 0; 
@@ -96,20 +107,20 @@ board.on("ready", ()=> {
 	// liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
 
 	board.loop(40, ()=> {
-    // if(global.var.safety.on && global.var.safety.danger > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
-    //   relay.safety.on(); 
-    //   global.var.selSpd = 0;
-    //   safetyLast = true;
-    //   lampStatus.safetyStart();
-    // }else if(global.var.safety.on){
-    //   if(safetyLast){
-    //     setTimeout(()=>{
-    //       relay.safety.off(); 
-    //       lampStatus.safetyStop();
-    //     }, 2000)
-    //   }
-    //   safetyLast = false;
-    // }
+    if(global.var.safety.on && global.var.safety.danger > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
+      relay.safety.on(); 
+      global.var.selSpd = 0;
+      safetyLast = true;
+      lampStatus.safetyStart();
+    }else if(global.var.safety.on){
+      if(safetyLast){
+        setTimeout(()=>{
+          relay.safety.off(); 
+          lampStatus.safetyStop();
+        }, 2000)
+      }
+      safetyLast = false;
+    }
     move.accel();
 
     if(lampStatus.safety == false){
