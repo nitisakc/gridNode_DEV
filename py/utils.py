@@ -12,7 +12,7 @@ class WebcamVideoStream:
         self.stream = cv2.VideoCapture(src)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        self.stream.set(cv2.CAP_PROP_EXPOSURE, 0)
+        # self.stream.set(cv2.CAP_PROP_EXPOSURE, 0)
         # self.stream.set(cv2.CAP_PROP_BRIGHTNESS, 90)
         # print(self.stream.get(cv2.CAP_PROP_EXPOSURE))
         self.width = width

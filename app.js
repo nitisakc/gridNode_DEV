@@ -18,6 +18,7 @@ var args = parser.parseArgs();
 const index = require('./routes/index');
 const ar = require('./routes/ar');
 const safety = require('./routes/safety');
+const to = require('./routes/to');
 
 let app = express();
 
@@ -36,6 +37,7 @@ app.use(function(req, res, next) {
 app.use('/', index);
 app.use('/ar', ar);
 app.use('/safety', safety);
+app.use('/to', to);
 
 const port = args.port;
 app.set('port', port);

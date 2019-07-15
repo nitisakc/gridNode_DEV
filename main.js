@@ -38,138 +38,6 @@ let degNow = 180,
 	sef = global.var.safety.on;
 
 let l = 1;
-let doJob2 = ()=>{
-	global.log('Start Job');
-	l = (l == 1 ? 2 : 1);
-	global.var.route = [63];
-	run(true, ()=>{
-		turn(0, ()=>{
-			offset(46, ()=>{
-				turn(90, ()=>{
-					global.var.route = [46];
-					run(false, ()=>{
-						lift.process(l, ()=>{
-							global.log('Lift ' + l);
-							offset(64, ()=>{
-								turn(180, ()=>{
-									doJob2();
-								});
-							});
-						});
-					});
-				});
-			});
-		});
-	});
-}
-
-let doJob = ()=>{
-	global.log('Start Job');
-	global.var.route = [63, 62, 47, 41, 6 ,40, 42];
-	run(true, ()=>{
-		turn(0, ()=>{
-			global.var.route = [6, 41, 47, 62, 63, 64];
-			run(true, ()=>{
-				offset(46, ()=>{
-					turn(90, ()=>{
-						global.var.route = [46];
-						run(false, ()=>{
-							lift.process(2, ()=>{
-								global.log('Lift Down');
-								offset(64, ()=>{
-									turn(180, ()=>{
-										global.var.route = [63, 62, 47, 41, 6 ,40, 42];
-										run(true, ()=>{
-											turn(0, ()=>{
-												global.var.route = [6, 41, 47, 62, 63, 64];
-												run(true, ()=>{
-													offset(46, ()=>{
-														turn(90, ()=>{
-															global.var.route = [46];
-															run(false, ()=>{
-																lift.process(1, ()=>{
-																	global.log('Lift Up');
-																	offset(64, ()=>{
-																		turn(180, ()=>{
-																			doJob();
-																		});
-																	});
-																});
-															});
-														});
-													});
-												});
-											});
-										});
-									});
-								});
-							});
-						});
-					});
-				});
-			});
-		});
-	});
-}
-
-// err = currDeg - degNow
-// err = 90 + (currDeg - degNow);
-
-let doJob3 = ()=>{
-	degNow = 0;
-	global.var.route = [11, 9];
-	run(false, ()=>{
-		global.var.route = [15];
-		run(true, ()=>{
-			doJob3();
-		});
-	});
-}
-
-let doJob4 = ()=>{
-	global.log('Start Job');
-	global.var.route = [63, 62, 47, 41, 6 ,40, 42]; //[64, 63, 62, 47];//
-	run(true, ()=>{
-		turn(0, ()=>{
-			global.var.route = [6, 41, 47, 62, 63, 64];//[62, 63, 64, 65]; //
-			run(true, ()=>{
-				turn(180, ()=>{
-					doJob4();
-				});
-			});
-		});
-	});
-}
-
-let doJob5 = ()=>{
-	global.log('Start Job');
-	global.var.route = [63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35]; //[64, 63, 62, 47];//
-	// lift.process(1, ()=>{
-		run(true, ()=>{
-			turn(0, ()=>{
-				global.var.route = [21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 6, 41, 47, 62, 63, 64]; //[64, 63, 62, 47];//
-				// lift.process(1, ()=>{
-					run(true, ()=>{
-						turn(180, ()=>{
-							doJob5();
-						});
-					});
-				// });
-			}, true);
-		});
-	// });
-}
-
-let doJob6 = ()=>{
-	degNow = 0;
-	global.log('Start Job');
-	global.var.route = [21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 6, 41, 47, 62, 63, 64]; //[64, 63, 62, 47];//
-	run(true, ()=>{
-		turn(180, ()=>{
-			
-		});
-	});
-}
 
 let lflag = true;
 let doJob7 = ()=>{
@@ -235,6 +103,54 @@ let doJob9 = ()=>{
 	});
 }
 
+
+let doJob = ()=>{
+	degNow = 0;
+	global.log('Start Job');
+	global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 6, 41, 47, 62, 63, 64, 65, 66, 67, 34];
+	run(true, ()=>{
+		turn(90, ()=>{
+			global.var.route = [16]; 
+			run(false, ()=>{
+				turn(90, ()=>{
+					lift.process(1, ()=>{
+						global.var.route = [1]; 
+						run(true, ()=>{
+							turn(180, ()=>{
+								global.var.route = [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38]; 
+								run(true, ()=>{
+									global.var.route = [8, 13, 7, 10, 14];
+									run(false, ()=>{
+										lift.process(2, ()=>{
+											global.var.route = [7, 13, 26, 38];
+											run(true, ()=>{
+												turn(0, ()=>{
+													global.var.route = [8];
+													run(true, ()=>{
+														global.var.to = null;
+														seeJob();
+													});
+												}, true);
+											});
+										});
+									});
+								});
+							}, true);
+						});
+					});
+				}, false);
+			});
+		}, true);
+	});
+}
+
+let seeJob = setInterval(()=>{
+	if(global.var.to != null){
+		clearInterval(seeJob);
+		doJob();
+	}
+}, 2000);
+
 setTimeout(()=>{
 	// doJob5();
 	// doJob6();
@@ -243,11 +159,13 @@ setTimeout(()=>{
 	// doJob9();
 	// turn(0, ()=>{
 
+	seeJob();
+
 	// }, true);
 	// global.var.route = [46];
 		// run(false, ()=>{});
 	
-},8000);
+},5000);
 
 let fixSpeed = [16, 38];
 let nonSafety = [];
@@ -295,10 +213,10 @@ let run = (dir = true, callback)=>{
 				
 				if(global.var.route.length == 0){ move.stop(); }
 				else{
-					if(global.var.route.length == 1 && Math.abs(a[4]) < 400){
+					if(global.var.route.length == 1){
 						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 60 : 50), true); }
 						else{
-							move.run(dir, 30, true);
+							move.run(dir, (Math.abs(a[4]) < 150) ? 30 : 50, true);
 						}
 					}else{
 						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 60 : 50), true); }
@@ -396,4 +314,7 @@ let turn = (d, callblack, rd = null)=>{
 		}
 	}, 10);
 }
+
+
+//global.var.to
 
