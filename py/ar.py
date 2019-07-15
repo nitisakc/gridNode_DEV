@@ -10,7 +10,7 @@ import json
 import requests
 from utils import WebcamVideoStream
 
-cap = WebcamVideoStream(src=1, width=1280, height=720).start()
+cap = WebcamVideoStream(src=0, width=1280, height=720).start()
 aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_100)
 parameters =  aruco.DetectorParameters_create()
 
@@ -31,7 +31,7 @@ while True:
 	frame = cap.read()
 	# frame = frame[0:1080, 100:1520]
 	# frame = cv2.rotate(frame, rotateCode = 0)
-	frame = frame[0:1080, 100:1180]
+	frame = frame[0:720, 0:1280]
 	frame = cv2.rotate(frame, rotateCode = 0)
 	fh, fw, _ = frame.shape
 	cx, cy = int(fw/2), int(fh/2)
@@ -54,10 +54,11 @@ while True:
 			y = (corner[0][0][1] + corner[0][1][1] + corner[0][2][1] + corner[0][3][1]) / 4
 
 			length = math.sqrt(math.pow(x - cx, 2) + math.pow(y - cy, 2))
-
+			back = 220
 			if int(ids[i]) != 999:
 				cv2.line(frame, (int(x), int(y)), (int(xtarget), int(ytarget)), (0, 180, 150), 1, 1)
 				cv2.line(frame, (cx, cy), (int(x), int(y)), (0, 0, 255), 2, 1)
+				cv2.line(frame, (cx, cy- back), (int(x), int(y)), (0, 255, 255), 2, 1)
 
 				degree = math.atan2(ylast-ytarget, xlast-xtarget)
 				degree = math.degrees(degree) - 90
@@ -67,7 +68,7 @@ while True:
 				xh = x - cx
 				yh = y - cy
 				err = 180 - abs(math.degrees(math.atan2(yh, xh)))
-				errBack = 180 - abs(math.degrees(math.atan2(y - cy - 130, xh)))
+				errBack = 180 - abs(math.degrees(math.atan2(y - cy - back, xh)))
 				if yh > 0:
 					zone = 'F'
 				else:

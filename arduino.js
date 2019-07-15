@@ -5,13 +5,14 @@ const eight = require("./north-eight.js");
 const SerialPort = require('serialport');
 
 const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
+// const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
 
-let calcPoten = d3.scaleLinear().domain([850, 155]).range([0, 180]).clamp(true);
-let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-20, 20]).clamp(true);
+let calcPoten = d3.scaleLinear().domain([900, 205]).range([0, 180]).clamp(true);
+let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-24, 24]).clamp(true);
 let calcSpeed = d3.scaleLinear().domain([0, 100]).range([0, 255]).clamp(true);
 let calcVolt = d3.scaleLinear().domain([0, 1024]).range([0, 5]).clamp(true);
 
-let relay, poten, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds, safetyLast = false;
+let relay, poten, reset, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds, safetyLast = false;
 
 board.on("exit", ()=> {
   global.log('Board exit.');
@@ -21,14 +22,14 @@ board.on("exit", ()=> {
 board.on("ready", ()=> {
   global.log('Board ready.');
   relay = {
-    enable: new eight.Relay({ pin: 22 }),
-    forward: new eight.Relay({ pin: 23 }),
-    backward: new eight.Relay({ pin: 24 }),
-    beep: new eight.Relay({ pin: 25 }),
-    liftup: new eight.Relay({ pin: 26 }),
-    liftdown: new eight.Relay({ pin: 27 }),
-    brake: new eight.Relay({ pin: 28 }),
-    safety: new eight.Relay({ pin: 29 })
+    enable: new eight.Relay({ pin: 22, type: 'LOW' }),
+    forward: new eight.Relay({ pin: 23, type: 'LOW' }),
+    backward: new eight.Relay({ pin: 24, type: 'LOW' }),
+    beep: new eight.Relay({ pin: 25, type: 'LOW' }),
+    liftup: new eight.Relay({ pin: 26, type: 'LOW' }),
+    liftdown: new eight.Relay({ pin: 27, type: 'LOW' }),
+    brake: new eight.Relay({ pin: 28, type: 'LOW' }),
+    safety: new eight.Relay({ pin: 29, type: 'LOW' })
   };
 
 
@@ -45,10 +46,11 @@ board.on("ready", ()=> {
   motors        = new five.Motor(4); 
   
   trunMotor     = new eight.BTS7960(45, 47, 44, 46); //use en 45 only
-	poten 			  = new five.Sensor({ pin: "A5", freq: 120 });
+  poten         = new five.Sensor({ pin: "A5", freq: 120 });
   liftp         = new five.Sensor({ pin: "A6", freq: 120 });
-	liftPosUp 		= new five.Button({ pin: 6, isPullup: true });
-	liftPosDown 	= new five.Button({ pin: 7, isPullup: true });
+  reset         = new five.Button({ pin: 8, isPullup: true });
+  liftPosUp     = new five.Button({ pin: 6, isPullup: true });
+  liftPosDown   = new five.Button({ pin: 7, isPullup: true });
   rds = [ new five.Proximity({ controller: "GP2Y0A02YK0F", pin: "A4" }),
           new five.Proximity({ controller: "GP2Y0A02YK0F", pin: "A7" }) ];
 
@@ -82,25 +84,39 @@ board.on("ready", ()=> {
     }
   });
 
-	// liftPosUp.on("down", 	()=> { 
+  reset.on("down",  ()=> { 
+    global.var.en = false; 
+    relay.enable.off(); 
+    relay.brake.off(); 
+    
+    global.var.currSpd = 0;
+    global.var.selSpd = 0;
+    motors.stop();
+  });
+
+  // liftPosUp.on("down",   ()=> { 
  //    global.var.liftpos = 1; 
  //    global.var.liftup = 0; 
  //  });
-	// liftPosUp.on("up", 		()=> { global.var.liftpos = 0; });
+  // liftPosUp.on("up",     ()=> { global.var.liftpos = 0; });
 
-	// liftPosDown.on("down", 	()=> { 
+  // liftPosDown.on("down",   ()=> { 
  //    global.var.liftpos = 2; 
  //    global.var.liftup = 0; 
  //  });
-	// liftPosDown.on("up", 	()=> { global.var.liftpos = 0; });
+  // liftPosDown.on("up",   ()=> { global.var.liftpos = 0; });
 
-	board.loop(40, ()=> {
+  board.loop(40, ()=> {
     if(global.var.safety.on && global.var.safety.danger > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
       relay.safety.on(); 
+      move.stop();
       global.var.selSpd = 0;
       safetyLast = true;
-      lampStatus.safetyStart();
-    }else{
+
+      if(lampStatus.safety == false){ other.beep(); lampStatus.safetyStart(); }  
+      
+      
+    }else if(global.var.safety.on){
       if(safetyLast){
         setTimeout(()=>{
           relay.safety.off(); 
@@ -111,7 +127,7 @@ board.on("ready", ()=> {
     }
     move.accel();
 
-    if(lampStatus.safetyInter == false){
+    if(lampStatus.safety == false){
       if(global.var.en && global.var.dir != 0){
         if(Math.abs(global.var.diffDeg) > 30){
           lampStatus.danger();
@@ -122,7 +138,7 @@ board.on("ready", ()=> {
         lampStatus.standby();
       }
     }
-	});
+  });
 
   board.on("exit", ()=> {
     console.log('exit');
@@ -141,8 +157,8 @@ let lampStatus = {
   },
   safetyStop: ()=>{
     lampStatus.safety = false;
-    lamp.r.off();
-    lamp.o.off();
+    lamp.r.stop();
+    lamp.o.stop();
   },
   danger: ()=>{
     lamp.r.on();
@@ -212,10 +228,10 @@ let move = {
     global.var.dir = 0;
   },
   speed: (val)=>{
-    if(global.var.safety.on && global.var.safety.warning > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
-      val = parseInt(val / 1.5);
-      val = val < 30 ? 30 : val;
-    }
+    // if(global.var.safety.on && global.var.safety.warning > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
+    //   val = parseInt(val / 1.5);
+    //   val = val < 30 ? 30 : val;
+    // }
 
     global.var.selSpd = val;
   },

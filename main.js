@@ -34,8 +34,8 @@ setInterval(()=>{
 
 require('./screen');
 
-let degNow = 180;
-
+let degNow = 180,
+	sef = global.var.safety.on;
 
 let l = 1;
 let doJob2 = ()=>{
@@ -171,31 +171,37 @@ let doJob6 = ()=>{
 	});
 }
 
+let lflag = true;
 let doJob7 = ()=>{
 	degNow = 180;
 	global.log('Start Job');
-	global.var.route = [35, 23, 12, 33, 25, 26, 38]; //[64, 63, 62, 47];//
-	run(true, ()=>{
+	// global.var.route = [35, 23, 12, 33, 25, 26, 38]; //[64, 63, 62, 47];//
+	// run(true, ()=>{
 		global.var.route = [8, 13, 7, 10, 14];
 		run(false, ()=>{
-			global.var.route = [7, 13, 8];
-			run(true, ()=>{
-				turn(270, ()=>{
-					global.var.route = [16];
-					run(true, ()=>{
-						turn(0, ()=>{
-							global.var.route = [33, 12, 23, 35, 24, 21];
-							run(true, ()=>{
-								turn(180, ()=>{
-									doJob7();
-								}, true);
-							});
-						}, true);
-					});
-				}, true);
-			});
+			// lift.process(lflag ? 2 : 1, ()=>{
+				lflag = !lflag;
+				global.var.route = [7, 13, 26, 38];
+				run(true, ()=>{
+					turn(0, ()=>{
+						global.var.route = [8];
+						run(true, ()=>{
+						// global.var.route = [26, 38];//[16];
+						// run(true, ()=>{
+							// turn(0, ()=>{
+								global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 6, 41, 47, 62, 63, 64, 65, 66];
+								run(true, ()=>{
+									// turn(180, ()=>{
+										doJob9();
+									}, true);
+								// });
+							// }, true);
+						});
+					}, true);
+				});
+			// });
 		});
-	});
+	// });
 }
 
 let doJob8 = ()=>{
@@ -206,11 +212,35 @@ let doJob8 = ()=>{
 	});
 }
 
+let doJob9 = ()=>{
+	global.log('Start Job');
+	global.var.route = [67, 34]; 
+	run(true, ()=>{
+		turn(90, ()=>{
+			global.var.route = [16]; 
+			run(false, ()=>{
+				turn(90, ()=>{
+					global.var.route = [1]; 
+					run(true, ()=>{
+						turn(180, ()=>{
+							global.var.route = [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38]; 
+							run(true, ()=>{
+								doJob7();
+							});
+						}, true);
+					});
+				}, false);
+			});
+		}, true);
+	});
+}
+
 setTimeout(()=>{
 	// doJob5();
 	// doJob6();
 	// doJob7();
 	//doJob8();
+	// doJob9();
 	// turn(0, ()=>{
 
 	// }, true);
@@ -219,8 +249,12 @@ setTimeout(()=>{
 	
 },8000);
 
+let fixSpeed = [16, 38];
+let nonSafety = [];
+
 let run = (dir = true, callback)=>{
 	global.log('Routing ' + JSON.stringify(global.var.route));
+	let ar0count = 0;
 	let runInter = setInterval(()=>{
 		if(global.var.route.length == 0){
 			clearInterval(runInter);
@@ -228,7 +262,12 @@ let run = (dir = true, callback)=>{
 			global.log('Route 0');
 			if(callback){ callback(); }
 		}else if(global.var.route.length > 0){
-			if(global.var.route[0] == 26 || global.var.route[0] == 38){}
+			if(nonSafety.indexOf(global.var.route[0]) > -1){
+				global.var.safety.on = false;
+			}else{
+				global.var.safety.on = sef;
+			}
+
 			global.log('Go to number ' + global.var.route[0]);
 			let a = global.var.ar.find(d => d[0] == global.var.route[0]);
 			if(a){
@@ -243,7 +282,7 @@ let run = (dir = true, callback)=>{
 						global.var.route.shift()
 					}
 				}else{
-					if(a[4] < -140){
+					if(a[4] < -220){
 						global.var.selDeg = parseInt(90 + (a[3] / 3));//a[9];//90 + (a[2] - degNow);//calcErr(a[5]);
 						global.var.pidval = parseInt(90 + (a[3] / 3));//a[9];//90 + (a[2] - degNow);//calcErr(a[5]);
 					// }else if(a[4] >= -120 && a[4] < 0){
@@ -257,12 +296,12 @@ let run = (dir = true, callback)=>{
 				if(global.var.route.length == 0){ move.stop(); }
 				else{
 					if(global.var.route.length == 1 && Math.abs(a[4]) < 400){
-						if(global.var.route[0] == 38 || global.var.route[0] == 16){ move.run(dir, (dir ? 60 : 40), true); }
+						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 60 : 50), true); }
 						else{
 							move.run(dir, 30, true);
 						}
 					}else{
-						if(global.var.route[0] == 26 || global.var.route[0] == 38){ move.run(dir, (dir ? 60 : 40), true); }
+						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 60 : 50), true); }
 						else{ move.run(dir, (dir ? 100 : 60), true); }
 					}
 				}
@@ -276,6 +315,7 @@ let run = (dir = true, callback)=>{
 				// }
 				global.log('AR 0');
 				move.run(dir, (dir ? 60 : 40), false);
+				ar0count = ar0count + 1;
 			}
 		}
 	}, 20);
@@ -294,7 +334,7 @@ let offset = (no, callblack)=> {
 
 		if(a && (global.var.currDeg > 85 || global.var.currDeg < 95)){
 			let l = a[4];
-			if(l > -130){
+			if(l > -200){
 				move.run(true, 50, false);
 			}else if(l < -140){
 				move.run(false, 50, false);
@@ -339,7 +379,7 @@ let turn = (d, callblack, rd = null)=>{
 					if(Math.abs(diff) > 40){
 						move.run(true, 70);
 					}else{
-						move.run(true, 25);
+						move.run(true, 30);
 					}
 				}
 			}else{
