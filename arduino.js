@@ -4,11 +4,11 @@ const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
 const SerialPort = require('serialport');
 
-const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
-// const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
+// const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
+const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
 
-let calcPoten = d3.scaleLinear().domain([900, 205]).range([0, 180]).clamp(true);
-let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-24, 24]).clamp(true);
+let calcPoten = d3.scaleLinear().domain([920, 205]).range([0, 180]).clamp(true);
+let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-22, 22]).clamp(true);
 let calcSpeed = d3.scaleLinear().domain([0, 100]).range([0, 255]).clamp(true);
 let calcVolt = d3.scaleLinear().domain([0, 1024]).range([0, 5]).clamp(true);
 
@@ -76,9 +76,9 @@ board.on("ready", ()=> {
     global.var.diffDeg = (diff).toFixed(0);//calcDiff(diff).toFixed(0);
     let d = calcDiff(diff).toFixed(0);
     if(d < -1){
-      trunMotor.lift(255);
+      trunMotor.lift(230);
     }else if(d > 1){
-      trunMotor.right(255);
+      trunMotor.right(230);
     }else{
       trunMotor.stop();
     }

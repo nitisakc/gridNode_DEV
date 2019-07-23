@@ -41,6 +41,27 @@ let l = 1;
 
 let lflag = true;
 
+let toBuffer = (callback)=>{
+	global.var.route = [8, 13, 7, 10, 14];
+	if(global.var.to == 7){ global.var.route = [8, 13, 7]; }
+	if(global.var.to == 10){ global.var.route = [8, 13, 7, 10]; }
+	
+	run(false, ()=>{
+		// lift.process(2, ()=>{
+			global.var.route = [7, 13, 8, 38];
+			run(true, ()=>{
+				turn(0, ()=>{
+					global.var.route = [8];
+					run(true, ()=>{
+						global.var.to = null;
+						callback(); 
+					});
+				}, true);
+			});
+		// });
+	});
+}
+
 let doJob = ()=>{
 	degNow = 0;
 	global.log('Start Job');
@@ -56,23 +77,8 @@ let doJob = ()=>{
 							turn(180, ()=>{
 								global.var.route = [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38]; 
 								run(true, ()=>{
-									global.var.route = [8, 13, 7, 10, 14];
-									if(global.var.to == 7){ global.var.route = [8, 13, 7]; }
-									if(global.var.to == 10){ global.var.route = [8, 13, 7, 10]; }
-									
-									run(false, ()=>{
-										lift.process(2, ()=>{
-											global.var.route = [7, 13, 26, 38];
-											run(true, ()=>{
-												turn(0, ()=>{
-													global.var.route = [8];
-													run(true, ()=>{
-														global.var.to = null;
-														seeJob();
-													});
-												}, true);
-											});
-										});
+									toBuffer(()=>{
+										seeJob();
 									});
 								});
 							}, true);
@@ -84,10 +90,122 @@ let doJob = ()=>{
 	});
 }
 
+let doJob2031 = ()=>{
+	degNow = 0;
+	global.log('Start Job');
+	global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36,45 ,5, 49, 4, 2];
+	run(true, ()=>{
+		turn(90, ()=>{
+			global.var.route = [48]; 
+			run(false, ()=>{
+				// turn(90, ()=>{
+					// lift.process(1, ()=>{
+						global.var.route = [39]; 
+						run(true, ()=>{
+							turn(180, ()=>{
+								global.var.route = [4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38]; 
+								run(true, ()=>{
+									toBuffer(()=>{
+										seeJob();
+									});
+								});
+							}, true);
+						});
+					// });
+				// }, false);
+			});
+		}, true);
+	});
+}
+
+let doJob2025 = ()=>{
+	degNow = 0;
+	global.log('Start Job');
+	global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 27];
+	run(true, ()=>{
+		turn(90, ()=>{
+			global.var.route = [96]; 
+			run(false, ()=>{
+				// turn(90, ()=>{
+					// lift.process(1, ()=>{
+						// global.var.route = [73]; 
+						// run(true, ()=>{
+							// turn(180, ()=>{
+								global.var.route = [40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38]; 
+								run(true, ()=>{
+									toBuffer(()=>{
+										seeJob();
+									});
+								});
+							// }, true);
+						// });
+					// });
+				// }, false);
+			});
+		}, true);
+	});
+}
+
+let doJob2027 = ()=>{
+	degNow = 0;
+	global.log('Start Job');
+	global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 73, 3, 88];
+	run(true, ()=>{
+		turn(270, ()=>{
+			global.var.route = [72]; 
+			run(false, ()=>{
+				// turn(90, ()=>{
+					// lift.process(1, ()=>{
+						// global.var.route = [73]; 
+						// run(true, ()=>{
+							// turn(180, ()=>{
+								global.var.route = [6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38]; 
+								run(true, ()=>{
+									toBuffer(()=>{
+										seeJob();
+									});
+								});
+							// }, true);
+						// });
+					// });
+				// }, false);
+			});
+		}, false);
+	});
+}
+
+let doJob2024 = ()=>{
+	degNow = 0;
+	global.log('Start Job');
+	global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 6, 41, 47, 62];
+	run(true, ()=>{
+		turn(90, ()=>{
+			global.var.route = [95]; 
+			run(false, ()=>{
+				// turn(90, ()=>{
+					// lift.process(1, ()=>{
+						global.var.route = [0]; 
+						run(true, ()=>{
+							turn(180, ()=>{
+								global.var.route = [41, 6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38]; 
+								run(true, ()=>{
+									toBuffer(()=>{
+										seeJob();
+									});
+								});
+							}, true);
+						});
+					// });
+				// }, false);
+			});
+		}, true);
+	});
+}
+
 let seeJob = ()=>{
 	setTimeout(()=>{
 		if(global.var.to != null){
-			doJob();
+			doJob2024();
 		}else{
 			seeJob();
 		}
@@ -100,6 +218,22 @@ setTimeout(()=>{
 	seeJob();
 	
 },5000);
+
+var pm2 = require('pm2');
+
+pm2.connect(function(err) {
+  if (err) {
+    console.error(err);
+    process.exit(2);
+  }
+  
+  pm2.start({
+    script    : 'py/ar.py',         // Script to be run
+  }, function(err, apps) {
+    pm2.disconnect();   // Disconnects from PM2
+    if (err) throw err
+  });
+});
 
 let fixSpeed = [16, 38];
 let nonSafety = [];
@@ -157,6 +291,7 @@ let run = (dir = true, callback)=>{
 						else{ move.run(dir, (dir ? 100 : 60), true); }
 					}
 				}
+				ar0count = 0;
 			}else{
 				// if(global.var.ar.length > 0){
 				// 	if(dir){
@@ -165,9 +300,14 @@ let run = (dir = true, callback)=>{
 				// 		global.var.selDeg = 90 + (global.var.ar[0][3] / 10);
 				// 	}
 				// }
-				global.log('AR 0');
-				move.run(dir, (dir ? 60 : 40), false);
-				ar0count = ar0count + 1;
+
+				if(ar0count > 20){
+					move.stop();
+					global.log('AR 0');
+				}else{
+					move.run(dir, (dir ? 60 : 40), false);
+					ar0count = ar0count + 1;
+				}
 			}
 		}
 	}, 20);
