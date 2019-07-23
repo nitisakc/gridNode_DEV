@@ -4,8 +4,17 @@ const calc = require('./utils/calc');
 const func = require('./utils/func');
 const { board, relay, lamp, move, lift, other } = require('./arduino');
 const syss = require('./syss');
+let steps = require('./steps.json');
 
 let calcErr = d3.scaleLinear().domain([0, 180]).range([180, 0]).clamp(true);
+
+let fixSpeed = [16, 38];
+let nonSafety = [];
+let runInter, offsetInter, turnInter;
+
+let degNow = 180, sef = global.var.safety.on;
+let l = 1, step = 0;
+let lflag = true;
 
 global.io.on('connection', function(socket) {
 	global.io.to(socket.id).emit('conn', socket.id);
@@ -34,13 +43,6 @@ setInterval(()=>{
 
 require('./screen');
 
-let degNow = 180,
-	sef = global.var.safety.on;
-
-let l = 1;
-
-let lflag = true;
-
 let toBuffer = (callback)=>{
 	global.var.route = [8, 13, 7, 10, 14];
 	if(global.var.to == 7){ global.var.route = [8, 13, 7]; }
@@ -54,6 +56,7 @@ let toBuffer = (callback)=>{
 					global.var.route = [8];
 					run(true, ()=>{
 						global.var.to = null;
+						global.var.buffer = null;
 						callback(); 
 					});
 				}, true);
@@ -202,10 +205,37 @@ let doJob2024 = ()=>{
 	});
 }
 
+
+let loop = (s)=>{
+	if(s){
+		if(step < s.length){
+			let inx = step;
+			step++;
+
+			if(s[inx].event == 'run'){
+				global.var.route = s[inx].route;
+				run(s[inx].dir, ()=>{ loop(s); });
+			}else if(s[inx].event == 'turn'){
+				turn(s[inx].deg, ()=>{ loop(s); }, s[inx].dir);
+			}else if(s[inx].event == 'lift'){
+				//loop(s);
+				lift.process(s[inx].dir, ()=>{ loop(s); });
+			}
+		}
+		else{
+			toBuffer(()=>{
+				seeJob();
+			});
+		}
+	}
+}
+
 let seeJob = ()=>{
 	setTimeout(()=>{
-		if(global.var.to != null){
-			doJob2024();
+		if(global.var.to != null && global.var.buffer != null){
+			steps = require('./steps.json');
+			step = 0;
+			loop(steps.['M' + global.var.to]);
 		}else{
 			seeJob();
 		}
@@ -217,7 +247,7 @@ setTimeout(()=>{
 
 	seeJob();
 	
-},5000);
+},3000);
 
 var pm2 = require('pm2');
 
@@ -235,13 +265,11 @@ pm2.connect(function(err) {
   });
 });
 
-let fixSpeed = [16, 38];
-let nonSafety = [];
 
 let run = (dir = true, callback)=>{
 	global.log('Routing ' + JSON.stringify(global.var.route));
 	let ar0count = 0;
-	let runInter = setInterval(()=>{
+	runInter = setInterval(()=>{
 		if(global.var.route.length == 0){
 			clearInterval(runInter);
 			move.stop();
@@ -301,7 +329,7 @@ let run = (dir = true, callback)=>{
 				// 	}
 				// }
 
-				if(ar0count > 20){
+				if(ar0count > 100){
 					move.stop();
 					global.log('AR 0');
 				}else{
@@ -316,7 +344,7 @@ let run = (dir = true, callback)=>{
 let offset = (no, callblack)=> {
 	global.var.selDeg = 90;
 	global.log('Run Offset ' + no);
-	let runInter = setInterval(()=>{
+	offsetInter = setInterval(()=>{
 		let a = global.var.ar.find(d => d[0] == no);
 		if(a){
 			global.var.selDeg = 90 + (a[2] - degNow);
@@ -332,7 +360,7 @@ let offset = (no, callblack)=> {
 				move.run(false, 50, false);
 			}else{
 				move.stop();
-				clearInterval(runInter);
+				clearInterval(offsetInter);
 				global.log('Offset ' + no + ' done.');
 				if(callblack){ callblack(); }
 			}
@@ -343,7 +371,7 @@ let offset = (no, callblack)=> {
 let turn = (d, callblack, rd = null)=>{
 	global.log('Turning ' + d);
 	let turnFlag = true;
-	let turnInter = setInterval(()=>{
+	turnInter = setInterval(()=>{
 		if(global.var.ar.length > 0){
 			let z = (rd == true && d == 0 ? 359 : d);
 			// z = (z == 180 ? 170 : z);
@@ -369,9 +397,9 @@ let turn = (d, callblack, rd = null)=>{
 				if((global.var.selDeg == tr && (rd == true ? global.var.currDeg < 349 : (global.var.currDeg > (tr - 5)))) || (global.var.selDeg == tl && global.var.currDeg < (tl + 5))){
 					turnFlag = false;
 					if(Math.abs(diff) > 40){
-						move.run(true, 70);
+						move.run(true, 75);
 					}else{
-						move.run(true, 30);
+						move.run(true, 27);
 					}
 				}
 			}else{
