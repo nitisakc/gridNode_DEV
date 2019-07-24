@@ -4,8 +4,8 @@ const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
 const SerialPort = require('serialport');
 
-// const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
-const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
+const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
+// const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
 
 let calcPoten = d3.scaleLinear().domain([920, 205]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-22, 22]).clamp(true);
@@ -43,7 +43,13 @@ board.on("ready", ()=> {
     w: new five.Led({ pin: 38 })
   };
 
-  motors        = new five.Motor(4); 
+  motors        = new five.Motor(4);
+
+  let beeps = {
+    a: new five.Led({ pin: 39 }),
+    b: new five.Led({ pin: 41 })
+  }
+  beeps.a.blink(500);
   
   trunMotor     = new eight.BTS7960(45, 47, 44, 46); //use en 45 only
   poten         = new five.Sensor({ pin: "A5", freq: 120 });
@@ -107,7 +113,10 @@ board.on("ready", ()=> {
   // liftPosDown.on("up",   ()=> { global.var.liftpos = 0; });
 
   board.loop(40, ()=> {
-    if(global.var.safety.on && global.var.safety.danger > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
+    if(global.var.selSpd > 0 && global.var.en == true && global.var.dir != 0){ beeps.b.off(); }
+    else{ beeps.b.on(); }
+
+    if(global.var.safety.on && global.var.safety.danger > 2 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
       relay.safety.on(); 
       move.stop();
       global.var.selSpd = 0;
@@ -228,10 +237,10 @@ let move = {
     global.var.dir = 0;
   },
   speed: (val)=>{
-    // if(global.var.safety.on && global.var.safety.warning > 0 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
-    //   val = parseInt(val / 1.5);
-    //   val = val < 30 ? 30 : val;
-    // }
+    if(global.var.safety.on && global.var.safety.warning > 3 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
+      val = parseInt(val / 1.3);
+      val = val < 30 ? 30 : val;
+    }
 
     global.var.selSpd = val;
   },
