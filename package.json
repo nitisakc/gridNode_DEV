@@ -59,6 +59,7 @@
     "diffDeg": 0,
     "pidon": false,
     "pidval": 255,
+    "poten": 0,
     "ar": [
       [
         0,
@@ -95,6 +96,7 @@
       255
     ],
     "route": [],
-    "to": null
+    "to": null,
+    "buffer": null
   }
 }

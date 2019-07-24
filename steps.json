@@ -1,0 +1,49 @@
+{
+	"M2024": [
+		{ "event": "run", "dir": true, "route": [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 6, 41, 47, 62] },
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "lift", "dir": 2 },
+		{ "event": "run", "dir": false, "route": [95] },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "run", "dir": true, "route": [0] },
+		{ "event": "turn", "deg": 180, "dir": true },
+		{ "event": "run", "dir": true, "route": [41, 6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2027": [
+		{ "event": "run", "dir": true, "route": [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 73, 3, 88] },
+		{ "event": "turn", "deg": 270, "dir": false },
+		{ "event": "lift", "dir": 2 },
+		{ "event": "run", "dir": false, "route": [72] },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2025": [
+		{ "event": "run", "dir": true, "route": [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 27] },
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "lift", "dir": 2 },
+		{ "event": "run", "dir": false, "route": [96] },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "run", "dir": true, "route": [40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2031": [
+		{ "event": "run", "dir": true, "route": [25, 33, 12, 23, 35, 24, 21, 37, 43, 36,45 ,5, 49, 4, 2] },
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "lift", "dir": 2 },
+		{ "event": "run", "dir": false, "route": [48] },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "run", "dir": true, "route": [39] },
+		{ "event": "turn", "deg": 180, "dir": true },
+		{ "event": "run", "dir": true, "route": [4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2029": [
+		{ "event": "run", "dir": true, "route": [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 6, 41, 47, 62, 63, 64, 65, 66, 67, 34] },
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "lift", "dir": 2 },
+		{ "event": "run", "dir": false, "route": [16] },
+		{ "event": "turn", "deg": 90, "dir": false },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "run", "dir": true, "route": [1] },
+		{ "event": "turn", "deg": 180, "dir": true },
+		{ "event": "run", "dir": true, "route": [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	]
+}

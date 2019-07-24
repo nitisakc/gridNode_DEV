@@ -8,7 +8,7 @@ let screen = blessed.screen();
 let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
 
 // table status
-  let table =  grid.set(0, 0, 5, 4, contrib.table, { 
+  let table =  grid.set(0, 0, 8, 5, contrib.table, { 
     keys: false,
     fg: 'white',
     label: 'Arduino val.',
@@ -16,14 +16,14 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
     columnSpacing: 1,
     columnWidth: [17, 10]
   });
-  let varName = ['en','dir', 'currSpd', 'selSpd', 'currDeg', 'selDeg', 'diffDeg', 'pidon', 'pidval', 'liftpos', 'liftup', 'safety', 'route', 'rds'];
+  let varName = ['en','dir', 'currSpd', 'selSpd', 'currDeg', 'selDeg', 'poten', 'pidon', 'pidval', 'liftpos', 'liftup', 'to', 'buffer'];
   function generateTable() {
      let data = [];
      for (let i = 0; i < varName.length; i++) {
        let row = [];      
        row.push(varName[i]);
        // row.push(20);
-       row.push(global.var[varName[i]]);
+       row.push(global.var[varName[i]] == null ? 'null' : global.var[varName[i]]);
 
        data.push(row);
      }
@@ -37,7 +37,7 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
 
 
 // logs 
-  let tableLogs =  grid.set(5, 4, 6, 8, contrib.table, { 
+  let tableLogs =  grid.set(5, 5, 6, 14, contrib.table, { 
     keys: false,
     fg: 'white',
     label: 'Logs',
@@ -64,13 +64,13 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
   setInterval(generateTableLogs, 500);
 
 //table ar
-  let tableAr =  grid.set(0, 4, 5, 8, contrib.table, { 
+  let tableAr =  grid.set(0, 5, 5, 14, contrib.table, { 
     keys: false,
     fg: 'white',
     label: 'AR Vision',
     interactive: false,
     columnSpacing: 1,
-    columnWidth: [8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
+    columnWidth: [5, 7, 7, 7, 7, 7, 7, 7, 7, 7]
   });
   function generateTableAr() {
      let data = [];
@@ -82,7 +82,7 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
   setInterval(generateTableAr, 250);
 
 //network status
-  var netstat = grid.set(5, 0, 4, 4, contrib.donut, { 
+  var netstat = grid.set(8, 0, 4, 5, contrib.donut, { 
     label: 'Network Status',
     radius: 12,
     arcWidth: 6,
@@ -104,20 +104,20 @@ let grid = new contrib.grid({rows: 12, cols: 19, screen: screen});
   }, 2000);
 
 //lcd ger diff
-  var lcdDiff = grid.set(9, 0, 2, 4, contrib.lcd, { 
-    segmentWidth: 0.04,
-    segmentInterval: 0.01,
-    strokeWidth: 0.04,
-    elements: 4,
-    elementSpacing: 4,
-    elementPadding: 2,
-    color: 'green',
-    label: 'Degree Diff'
-  });
+  // var lcdDiff = grid.set(9, 0, 2, 4, contrib.lcd, { 
+  //   segmentWidth: 0.04,
+  //   segmentInterval: 0.01,
+  //   strokeWidth: 0.04,
+  //   elements: 4,
+  //   elementSpacing: 4,
+  //   elementPadding: 2,
+  //   color: 'green',
+  //   label: 'Degree Diff'
+  // });
 
-  setInterval(()=>{
-    lcdDiff.setDisplay(calc.pad(global.var.diffDeg, 4, " "));
-  }, 200);
+  // setInterval(()=>{
+  //   lcdDiff.setDisplay(calc.pad(global.var.diffDeg, 4, " "));
+  // }, 200);
 
 screen.render();
 
@@ -131,5 +131,5 @@ screen.on('resize', function() {
   tableLogs.emit('attach');
   tableAr.emit('attach');
   netstat.emit('attach');
-  lcdDiff.emit('attach');
+  // lcdDiff.emit('attach');
 });
