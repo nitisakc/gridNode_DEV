@@ -4,10 +4,10 @@ const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
 const SerialPort = require('serialport');
 
-const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
-// const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
+// const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
+const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
 
-let calcPoten = d3.scaleLinear().domain([920, 205]).range([0, 180]).clamp(true);
+let calcPoten = d3.scaleLinear().domain([860, 190]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-22, 22]).clamp(true);
 let calcSpeed = d3.scaleLinear().domain([0, 100]).range([0, 255]).clamp(true);
 let calcVolt = d3.scaleLinear().domain([0, 1024]).range([0, 5]).clamp(true);
@@ -92,7 +92,9 @@ board.on("ready", ()=> {
   });
 
   reset.on("press",  ()=> { 
-    global.var.en = false; 
+    // console.log("reset press");
+    global.var.en = false;
+    global.var.dir = 0; 
     relay.enable.off(); 
     relay.brake.off(); 
     
@@ -103,22 +105,22 @@ board.on("ready", ()=> {
 
   liftPosUp.on("press",   ()=> { 
     global.var.liftpos = 1; 
-    console.log("liftPosUp press");
+    // console.log("liftPosUp press");
     // global.var.liftup = 0; 
   });
   liftPosUp.on("release",     ()=> { 
     global.var.liftpos = 0;
-    console.log("liftPosUp release"); 
+    // console.log("liftPosUp release"); 
   });
 
   liftPosDown.on("press",   ()=> { 
     global.var.liftpos = 2; 
-    console.log("liftPosDown press");
+    // console.log("liftPosDown press");
     // global.var.liftup = 0; 
   });
   liftPosDown.on("release",   ()=> { 
     global.var.liftpos = 0; 
-    console.log("liftPosDown release");
+    // console.log("liftPosDown release");
   });
 
   board.loop(40, ()=> {

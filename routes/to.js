@@ -17,4 +17,15 @@ router.get('/set/:id/:buf', function(req, res, next) {
 	res.send(200);
 });
 
+
+router.get('/set/:id', function(req, res, next) {
+	// console.log(req.body);
+	if(global.var.to == null){
+		global.var.to = req.params.id;
+		res.send(200);
+	}else{
+		res.send(null);
+	}
+});
+
 module.exports = router;
