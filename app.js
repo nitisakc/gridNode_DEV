@@ -55,6 +55,9 @@ global.log = (msgs)=>{
     old = msgs;
     let dd = new Date();//dd.getHours()+''+
     global.logs.unshift(dd.getMinutes()+'M'+dd.getSeconds()+'S:'+dd.getMilliseconds() + '|' + msgs);
+
+    if(global.io){ global.io.emit('logs', global.logs); }
+
     if(global.logs.length > 20){
       global.logs.pop();
     }

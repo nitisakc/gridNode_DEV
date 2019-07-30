@@ -16,7 +16,7 @@ let runInter, offsetInter, turnInter;
 let degNow = 180, sef = global.var.safety.on;
 let l = 1, step = 0;
 let lflag = true;
-let stepfile = stepfile1 = './steps.json', stepfile2 = './steps.json';
+let stepfile= './steps.json', stepfsbfile = './stepsfsb.json';
 
 let clearjob = ()=>{
 	global.log('Clear Job');
@@ -31,36 +31,88 @@ let clearjob = ()=>{
 
 let goHome = ()=>{
 	if(global.var.ar.length > 0){
-		global.log('Go Home');
-		clearjob();
-		global.var.to = 0;
-		global.var.buffer = 0;
-		let currDeg = global.var.ar[0][2];
-		if(currDeg > 135 && currDeg < 225){
-			let r = [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38];
-			for(i = 0; i < r.length; i++){
-				let a = global.var.ar.find(d => d[0] == r[i] && d[6] == 'F' && d[4] > 50);
-				if(a){
-					r.splice(0,i+1);
-					global.var.route = r;
+		global.log('Go Home'); 
+		global.var.ready = false;
+		turn(180, ()=>{
+			global.var.route = [6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38];
+			run(true, ()=>{
+				turn(0, ()=>{
+					global.var.route = [8];
 					run(true, ()=>{
-						turn(0, ()=>{
-							global.var.route = [8];
-							run(true, ()=>{
-								global.var.to = null;
-								global.var.buffer = null;
-								seeJob();
-							});
-						}, true);
+						global.var.to = null;
+						global.var.buffer = null;
+						// seeJob();
 					});
-				}
-			}
-		}
+				}, true);
+			});
+		}, true);
+
+	// clearjob();
+		// global.var.to = 0;
+		// global.var.buffer = 0;
+		// let currDeg = global.var.ar[0][2];
+		// if(currDeg > 135 && currDeg < 225){
+		// 	let r = [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38];
+		// 	for(i = 0; i < r.length; i++){
+		// 		let a = global.var.ar.find(d => d[0] == r[i] && d[6] == 'F' && d[4] > 50);
+		// 		if(a){
+		// 			i = 9999;
+		// 			r.splice(0,i+1);
+		// 			global.var.route = r;
+		// 			run(true, ()=>{
+		// 				turn(0, ()=>{
+		// 					global.var.route = [8];
+		// 					run(true, ()=>{
+		// 						global.var.to = null;
+		// 						global.var.buffer = null;
+		// 						seeJob();
+		// 					});
+		// 				}, true);
+		// 			});
+		// 		}
+		// 	}
+		// }
+	}
+}
+
+let toStandby = ()=>{
+	if(global.var.ar.length > 0){
+		global.log('To Standby');
+		global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 27, 50, 51];
+		run(true, ()=>{
+			lift.process(2, ()=>{
+				global.var.ready = true;
+				seeJob();
+			});
+		});
+
+
+	// let currDeg = global.var.ar[0][2];
+		// if(currDeg > 315 && currDeg < 45){
+		// 	let r = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 27, 50, 51];
+		// 	for(i = 0; i < r.length; i++){
+		// 		let a = global.var.ar.find(d => d[0] == r[i] && d[6] == 'F' && d[4] > 50);
+		// 		if(a){
+		// 			i = 9999;
+		// 			r.splice(0,i+1);
+		// 			global.var.route = r;
+		// 			global.log(r);
+		// 			run(true, ()=>{
+		// 				lift.process(2, ()=>{
+		// 					stepfile = stepfile2;
+		// 					seeJob();
+		// 				});
+		// 			});
+		// 		}
+		// 	}
+			
+		// }
 	}
 }
 
 global.io.on('connection', function(socket) {
 	global.io.to(socket.id).emit('conn', socket.id);
+	global.io.emit('logs', global.logs);
 
 	socket.on('ar', 	 (msgs)=> { global.var.ar 		= msgs; });
 
@@ -79,18 +131,19 @@ global.io.on('connection', function(socket) {
 	socket.on('dir',  (msgs)=> { msgs == 0 ? move.stop() : move.dir(msgs == 1); });
 	socket.on('liftup',  (msgs)=> { lift.process(msgs); });
 	socket.on('goHome',  (msgs)=> { goHome(); });
+	socket.on('toStandby',  (msgs)=> { toStandby(); });
 	socket.on('clearjob',  (msgs)=> { clearjob(); });
 });
 
 setInterval(()=>{
     global.io.emit('var', global.var);
-}, 200);
+}, 400);
 
-require('./screen');
+// require('./screen');
 
 let toBuffer = (callback)=>{
 	global.var.route = [8, 13, 7, 10, 14];
-	if(global.var.buffer == null){  }
+	if(global.var.buffer == null){ global.var.route = [8, 13, 7]; }
 	else if(global.var.buffer == 7){ global.var.route = [8, 13, 7]; }
 	else if(global.var.buffer == 10){ global.var.route = [8, 13, 7]; }
 	else if(global.var.buffer == 14){ global.var.route = [8, 13, 7, 10, 14]; }
@@ -103,7 +156,7 @@ let toBuffer = (callback)=>{
 				turn(0, ()=>{
 					global.var.route = [8];
 					run(true, ()=>{
-						global.var.to = null;
+						// global.var.to = null;
 						global.var.buffer = null;
 						callback(); 
 					});
@@ -113,23 +166,8 @@ let toBuffer = (callback)=>{
 	});
 }
 
-let toStandby = ()=>{
-	global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 27];
-	run(true, ()=>{
-		lift.process(2, ()=>{
-			stepfile = stepfile2;
-			seeJob();
-		});
-	});
-}
-
 let loop = (s)=>{
 	if(s){
-		// clearOrder(global.var.to, ()=>{ 
-		// 	global.var.to = null;
-		// 	global.var.buffer = null;
-		// 	seeJob(); 
-		// });
 		global.log('Loop ' + step);
 		if(step < s.length){
 			let inx = step;
@@ -142,28 +180,38 @@ let loop = (s)=>{
 			}else if(s[inx].event == 'lift'){
 				//loop(s);
 				lift.process(s[inx].dir, ()=>{ step++; loop(s); });
-			}else if(s[inx].event == 'clear'){
+			}else if(s[inx].event == 'clearorder'){
 				//loop(s);
-				clearOrder(global.var.to, ()=>{ step++; loop(s); });
+				// clearOrder(global.var.to, ()=>{ step++; loop(s); });
+				clearOrder(global.var.to);
+				global.var.to = null;
 			}
 			
 		}
 		else{
 			toBuffer(()=>{
-				request.get(
-				    `http://192.168.101.7:3310/api/getorder`,
-				    (err, res, body)=>{
-				    	if(!err && res.statusCode == 200 && body && body != '' && global.var.to == null){ global.var.to = body; }
-				    	if(global.var.to != null){
-							steps = require(stepfile1);
-							step = 0;
-							loop(steps[global.var.to]);
-							// console.dir(steps[global.var.to]);
-						}else{
-							toStandby();
-						}
-				    }
-				);
+				if(global.var.to != null && global.var.ready){
+					steps = require(stepfile);
+					step = 0;
+					loop(steps[global.var.to]);
+					// console.dir(steps[global.var.to]);
+				}else{
+					toStandby();
+				}
+				// request.get(
+				//     `http://192.168.101.7:3310/api/getorder`,
+				//     (err, res, body)=>{
+				//     	if(!err && res.statusCode == 200 && body && body != '' && global.var.to == null){ global.var.to = body; }
+				//     	if(global.var.to != null){
+				// 			steps = require(stepfile1);
+				// 			step = 0;
+				// 			loop(steps[global.var.to]);
+				// 			// console.dir(steps[global.var.to]);
+				// 		}else{
+				// 			toStandby();
+				// 		}
+				//     }
+				// );
 			});
 		}
 	}
@@ -182,30 +230,38 @@ let seeJob = ()=>{
 		// 	seeJob();
 		// }
 
-		if(global.var.to == 0){ return; }
-		request.get(
-		    `http://192.168.101.7:3310/api/getorder`,
-		    (err, res, body)=>{
-		    	if(!err && res.statusCode == 200 && body && body != '' && global.var.to == null){ global.var.to = body; }
-		    	if(global.var.to != null){
-					steps = require(stepfile);
-					step = 0;
-					loop(steps[global.var.to]);
-					// console.dir(steps[global.var.to]);
-				}else{
-					seeJob();
-				}
-		    }
-		);
+		// if(global.var.to == 0){ return; }
+		if(global.var.to != null && global.var.ready){
+			steps = require(stepfsbfile);
+			step = 0;
+			loop(steps[global.var.to]);
+			// console.dir(steps[global.var.to]);
+		}else{
+			seeJob();
+		}
+		// request.get(
+		//     `http://192.168.101.7:3310/api/getorder`,
+		//     (err, res, body)=>{
+		//     	if(!err && res.statusCode == 200 && body && body != '' && global.var.to == null){ global.var.to = body; }
+		//     	if(global.var.to != null){
+		// 			steps = require(stepfile);
+		// 			step = 0;
+		// 			loop(steps[global.var.to]);
+		// 			// console.dir(steps[global.var.to]);
+		// 		}else{
+		// 			seeJob();
+		// 		}
+		//     }
+		// );
 	}, 3000);
 }
 
-setTimeout(()=>{
-	// doJob();
+// setTimeout(()=>{
+// 	// doJob();
 
-	seeJob();
+// 	seeJob();
 	
-},3000);
+// },3000);
 
 var pm2 = require('pm2');
 
@@ -230,11 +286,16 @@ let clearOrder = (t, callback)=>{
 	    `http://192.168.101.7:3310/api/clrorder/${t}`,
 	    (err, res, body)=>{
 	    	// console.dir(body);
-	    	if(!err && res.statusCode == 200){
-	    		callback();
-	    	}else{
-	    		clearOrder(t);
-	    	}
+	    	// if(!err && res.statusCode == 200){
+	    	// 	callback();
+	    	// }else{
+	    	// 	clearOrder(t, callback);
+	    	// }
+
+	    	// if(callback){ callback(); }
+	    	// if(err && res.statusCode != 200){
+	    	// 	clearOrder(t);
+	    	// }
 	    }
 	);
 }

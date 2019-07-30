@@ -60,6 +60,7 @@
     "pidon": false,
     "pidval": 255,
     "poten": 0,
+    "ready": false,
     "ar": [
       [
         0,

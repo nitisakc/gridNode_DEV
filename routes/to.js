@@ -5,6 +5,12 @@ router.get('/', function(req, res, next) {
   res.sendfile('www/to.html');
 });
 
+router.get('/ready/:flag', function(req, res, next) {
+	global.var.ready = req.params.flag == 0 ? false : true;
+	res.send(global.var.ready);
+});
+
+
 router.get('/steps', function(req, res, next) {
   res.send(require('../steps.json'));
 });
@@ -31,7 +37,7 @@ router.get('/set/:id', function(req, res, next) {
 		global.var.to = req.params.id;
 		res.send(200);
 	}else{
-		res.send(null);
+		res.send(404);
 	}
 });
 

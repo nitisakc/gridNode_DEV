@@ -5,7 +5,8 @@
 		{ "event": "run", "dir": false, "route": [95] },
 		{ "event": "turn", "deg": 90, "dir": true },
 		{ "event": "lift", "dir": 1 },
-		{ "event": "run", "dir": true, "route": [0] },
+		{ "event": "run", "dir": true, "route": [52] },
+		{ "event": "clearorder" },
 		{ "event": "turn", "deg": 180, "dir": true },
 		{ "event": "run", "dir": true, "route": [41, 6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
 	],
@@ -14,6 +15,7 @@
 		{ "event": "turn", "deg": 270, "dir": false },
 		{ "event": "run", "dir": false, "route": [72] },
 		{ "event": "lift", "dir": 1 },
+		{ "event": "clearorder" },
 		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
 	],
 	"M2025": [
@@ -21,6 +23,7 @@
 		{ "event": "turn", "deg": 90, "dir": true },
 		{ "event": "run", "dir": false, "route": [96] },
 		{ "event": "lift", "dir": 1 },
+		{ "event": "clearorder" },
 		{ "event": "run", "dir": true, "route": [40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
 	],
 	"M2031": [
@@ -30,6 +33,7 @@
 		{ "event": "lift", "dir": 1 },
 		{ "event": "run", "dir": true, "route": [39] },
 		{ "event": "turn", "deg": 180, "dir": true },
+		{ "event": "clearorder" },
 		{ "event": "run", "dir": true, "route": [4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
 	],
 	"M2029": [
@@ -40,6 +44,7 @@
 		{ "event": "lift", "dir": 1 },
 		{ "event": "run", "dir": true, "route": [1] },
 		{ "event": "turn", "deg": 180, "dir": true },
+		{ "event": "clearorder" },
 		{ "event": "run", "dir": true, "route": [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
 	]
 }

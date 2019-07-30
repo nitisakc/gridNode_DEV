@@ -124,6 +124,7 @@ board.on("ready", ()=> {
   });
 
   board.loop(30, ()=> {
+    if(global.var.ar && global.var.ar.length > 0){ global.var.deg = global.var.ar[0][2]; }
     if(global.var.selSpd > 0 && global.var.en == true && global.var.dir != 0){ beeps.b.off(); }
     else{ beeps.b.on(); }
 

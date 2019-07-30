@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+  	<link rel="stylesheet" type="text/css" href="css/bootstrap-slider.min.css">
+	<link rel="stylesheet" type="text/css" href="css/roundslider.min.css">
+	<link rel="stylesheet" type="text/css" href="css/remote.css">
+	<link rel="stylesheet" type="text/css" href="css/rangeslider.css">
+	<style type="text/css" id="css">
+		/*.table td, .table th{
+			padding: 0.1rem;
+			padding-left: 0.3rem;
+		}
+		td{
+			font-weight: 100;
+		}*/
+	</style>
+</head>
+<body ng-app="APP" ng-controller="mainCtrl" style="background-color: #212529;">
+	<div class="row">
+		<div class="col col-3  mh-50">
+			<table class="table table-dark table-bordered table-sm">
+				<thead>
+					<tr>
+						<th style="width: 35%;">Names</th>
+						<th>Values</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="vn in varName">
+						<td>{{vn}}</td>
+						<td>{{var[vn]}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="col col-9">
+			<table class="table table-dark table-bordered table-sm" style="min-height: 50%;">
+				<thead>
+					<tr>
+						<th ng-repeat="ah in arHead" style="width: 10%;">{{ah}}</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="ar in var.ar" ng-show="$index < 7">
+						<td ng-repeat="a in ar">{{a}}</td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="table table-dark table-bordered table-sm">
+				<thead>
+					<tr>
+						<th style="width: 20%;">Time</th>
+						<th>Desc.</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="l in logs">
+						<td>{{l.split('|')[0]}}</td>
+						<td>{{l.split('|')[1]}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<!-- <div class="col col-3 mh-50">
+			<button type="button" ng-click="emit()" ng-class="en ? 'sel' : ''" class="btn btn-light">{{ var.ready ? 'Disable' : 'Enable' }}</button>
+		</div> -->
+	</div>
+	<script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap-slider.min.js"></script>
+	<script type="text/javascript" src="js/angular.min.js"></script>
+	<script type="text/javascript" src="js/socket.io.js" ></script>
+	<script type="text/javascript" src="js/rangeslider.min.js" ></script>
+	<script type="text/javascript" src="js/roundslider.min.js"></script>
+	<script type="text/javascript">
+		let app = angular.module('APP', []);
+		app.controller('mainCtrl', function($scope, $http) {
+			$(document).ready(function() {
+				var socket = io.connect('/');
+				$scope.varName = ['en','dir', 'deg', 'currSpd', 'selSpd', 'currDeg', 'selDeg', 'poten', 'pidon', 'pidval', 'liftpos', 'liftup', 'to', 'buffer', 'ready'];
+
+				$scope.arHead = ['ID', 'Len', 'Deg', 'XL', 'YL', 'Err', 'Zone', 'X', 'Y', 'bErr'];
+  
+			    if(socket){
+			        socket.on('conn', function (msg) {
+			            console.log("My id: " + msg);
+			        });
+
+			        socket.on('var', function (msg) {
+			        	$scope.$apply(()=>{
+			        		$scope.var = msg;
+				        });
+			        });
+			        socket.on('logs', function (msg) {
+			        	$scope.$apply(()=>{
+			        		$scope.logs = msg;
+				        });
+			        });
+
+			        $scope.emit = (name, val)=>{
+			        	socket.emit(name, val);
+			        }
+			    }
+			});
+		});
+	</script>
+</body>
+</html>
