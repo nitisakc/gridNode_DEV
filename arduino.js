@@ -4,8 +4,8 @@ const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
 const SerialPort = require('serialport');
 
-// const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
-const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
+const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
+// const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
 
 let calcPoten = d3.scaleLinear().domain([860, 190]).range([0, 180]).clamp(true);
 let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-22, 22]).clamp(true);
@@ -123,7 +123,7 @@ board.on("ready", ()=> {
     // console.log("liftPosDown release");
   });
 
-  board.loop(40, ()=> {
+  board.loop(30, ()=> {
     if(global.var.selSpd > 0 && global.var.en == true && global.var.dir != 0){ beeps.b.off(); }
     else{ beeps.b.on(); }
 

@@ -34,6 +34,11 @@
 			<button type="button" ng-click="emit('liftup',2)" ng-class="liftup == 2 ? 'sel' : ''" class="btn btn-light">Lift Down</button>
 		</div>
 		<br><br>
+		<div class="btn-group" role="group">
+			<button type="button" ng-click="emit('goHome',0)" class="btn btn-light">Go Home</button>
+			<button type="button" ng-click="emit('clearjob',0)" class="btn btn-light">Clear</button>
+		</div>
+		<br><br>
 		<div id="">{{var}}</div>
 	</div>
 	<script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>

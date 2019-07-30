@@ -16,6 +16,7 @@ let runInter, offsetInter, turnInter;
 let degNow = 180, sef = global.var.safety.on;
 let l = 1, step = 0;
 let lflag = true;
+let stepfile = stepfile1 = './steps.json', stepfile2 = './steps.json';
 
 let clearjob = ()=>{
 	global.log('Clear Job');
@@ -112,6 +113,16 @@ let toBuffer = (callback)=>{
 	});
 }
 
+let toStandby = ()=>{
+	global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 27];
+	run(true, ()=>{
+		lift.process(2, ()=>{
+			stepfile = stepfile2;
+			seeJob();
+		});
+	});
+}
+
 let loop = (s)=>{
 	if(s){
 		// clearOrder(global.var.to, ()=>{ 
@@ -139,7 +150,20 @@ let loop = (s)=>{
 		}
 		else{
 			toBuffer(()=>{
-				seeJob();
+				request.get(
+				    `http://192.168.101.7:3310/api/getorder`,
+				    (err, res, body)=>{
+				    	if(!err && res.statusCode == 200 && body && body != '' && global.var.to == null){ global.var.to = body; }
+				    	if(global.var.to != null){
+							steps = require(stepfile1);
+							step = 0;
+							loop(steps[global.var.to]);
+							// console.dir(steps[global.var.to]);
+						}else{
+							toStandby();
+						}
+				    }
+				);
 			});
 		}
 	}
@@ -164,7 +188,7 @@ let seeJob = ()=>{
 		    (err, res, body)=>{
 		    	if(!err && res.statusCode == 200 && body && body != '' && global.var.to == null){ global.var.to = body; }
 		    	if(global.var.to != null){
-					steps = require('./steps.json');
+					steps = require(stepfile);
 					step = 0;
 					loop(steps[global.var.to]);
 					// console.dir(steps[global.var.to]);
@@ -267,7 +291,7 @@ let run = (dir = true, callback)=>{
 				}
 				ar0count = 0;
 			}else{
-				if(ar0count > 200){
+				if(ar0count > 250){
 					move.stop();
 					global.log('AR 0');
 				}else{
