@@ -81,7 +81,7 @@ let toStandby = ()=>{
 		global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 27, 50, 51];
 		run(true, ()=>{
 			lift.process(2, ()=>{
-				global.var.ready = true;
+				// global.var.ready = true;
 				seeJob();
 			});
 		});
@@ -143,7 +143,7 @@ setInterval(()=>{
 
 let toBuffer = (callback)=>{
 	global.var.route = [8, 13, 7, 10, 14];
-	if(global.var.buffer == null){ global.var.route = [8, 13, 7]; }
+	if(global.var.buffer == null){ global.var.route = [8, 13, 7, 10, 14]; }
 	else if(global.var.buffer == 7){ global.var.route = [8, 13, 7]; }
 	else if(global.var.buffer == 10){ global.var.route = [8, 13, 7]; }
 	else if(global.var.buffer == 14){ global.var.route = [8, 13, 7, 10, 14]; }

@@ -33,7 +33,7 @@ router.get('/setbuf/:buf', function(req, res, next) {
 
 router.get('/set/:id', function(req, res, next) {
 	// console.log(req.body);
-	if(global.var.to == null){
+	if(global.var.to == null && global.var.ready){
 		global.var.to = req.params.id;
 		res.send(200);
 	}else{
