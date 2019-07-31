@@ -25,7 +25,7 @@ router.get('/set/:id/:buf', function(req, res, next) {
 
 router.get('/setbuf/:buf', function(req, res, next) {
 	// console.log(req.body);
-	global.var.buffer = req.params.buf;
+	global.var.buffer = req.params.buf == 0 ? null : req.params.buf;
 
 	res.send(200);
 });

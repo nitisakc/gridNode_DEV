@@ -78,7 +78,7 @@ let goHome = ()=>{
 let toStandby = ()=>{
 	if(global.var.ar.length > 0){
 		global.log('To Standby');
-		global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 27, 50, 51];
+		global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 54, 50, 51];
 		run(true, ()=>{
 			lift.process(2, ()=>{
 				// global.var.ready = true;
@@ -133,6 +133,7 @@ global.io.on('connection', function(socket) {
 	socket.on('goHome',  (msgs)=> { goHome(); });
 	socket.on('toStandby',  (msgs)=> { toStandby(); });
 	socket.on('clearjob',  (msgs)=> { clearjob(); });
+	socket.on('seejob',  (msgs)=> { global.var.ready = true; seeJob(); });
 });
 
 setInterval(()=>{
@@ -154,12 +155,12 @@ let toBuffer = (callback)=>{
 			global.var.route = [7, 13, 8, 38];
 			run(true, ()=>{
 				turn(0, ()=>{
-					global.var.route = [8];
-					run(true, ()=>{
-						// global.var.to = null;
+					// global.var.route = [8];
+					// run(true, ()=>{
+						global.var.to = null;
 						global.var.buffer = null;
 						callback(); 
-					});
+					// });
 				}, true);
 			});
 		});
@@ -181,10 +182,13 @@ let loop = (s)=>{
 				//loop(s);
 				lift.process(s[inx].dir, ()=>{ step++; loop(s); });
 			}else if(s[inx].event == 'clearorder'){
-				//loop(s);
+				//
 				// clearOrder(global.var.to, ()=>{ step++; loop(s); });
-				clearOrder(global.var.to);
-				global.var.to = null;
+				clearOrder(global.var.to, ()=>{
+					// global.var.to = null;
+					step++;
+					loop(s);
+				});
 			}
 			
 		}
@@ -285,6 +289,7 @@ let clearOrder = (t, callback)=>{
 	request.get(
 	    `http://192.168.101.7:3310/api/clrorder/${t}`,
 	    (err, res, body)=>{
+	    	callback();
 	    	// console.dir(body);
 	    	// if(!err && res.statusCode == 200){
 	    	// 	callback();

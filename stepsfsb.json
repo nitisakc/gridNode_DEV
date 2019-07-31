@@ -1,10 +1,29 @@
 {
 	"M2025": [
-		{ "event": "turn", "deg": 180, "dir": true },
-		{ "event": "run", "dir": true, "route": [6, 53] },
-		{ "event": "turn", "deg": 90, "dir": false },
+		{ "event": "run", "dir": false, "route": [55, 54] },
+		{ "event": "turn", "deg": 90, "dir": true },
 		{ "event": "run", "dir": false, "route": [96] },
 		{ "event": "lift", "dir": 1 },
+		{ "event": "run", "dir": true, "route": [54] },
+		{ "event": "clearorder" },
 		{ "event": "run", "dir": true, "route": [40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2027": [
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "run", "dir": true, "route": [88, 3] },
+		{ "event": "turn", "deg": 270, "dir": true },
+		{ "event": "run", "dir": false, "route": [72] },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2030": [
+		{ "event": "turn", "deg": 180, "dir": true },
+		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 16] },
+		{ "event": "turn", "deg": 270, "dir": true },
+		{ "event": "run", "dir": false, "route": [30] },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [16, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
 	]
 }
