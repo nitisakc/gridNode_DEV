@@ -4,19 +4,75 @@ const calc = require('./utils/calc');
 const func = require('./utils/func');
 const { board, relay, lamp, move, lift, other } = require('./arduino');
 const syss = require('./syss');
-let steps = require('./steps.json');
+// let steps = require('./steps.json');
 const request = require('request');
+let stepfile = require('./steps.json');
+let stepfsbfile = require('./stepsfsb.json');
+let steps = {
+	"M2025": [
+		{ "event": "run", "dir": false, "route": [55, 54] },
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "run", "dir": false, "route": [96] },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "run", "dir": true, "route": [54] },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2027": [
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "run", "dir": true, "route": [88, 3] },
+		{ "event": "turn", "deg": 270, "dir": true },
+		{ "event": "run", "dir": false, "route": [72] },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2030": [
+		{ "event": "turn", "deg": 180, "dir": true },
+		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 16] },
+		{ "event": "turn", "deg": 270, "dir": true },
+		{ "event": "run", "dir": false, "route": [30] },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [16, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2029": [
+		{ "event": "run", "dir": true, "route": [47, 62, 63, 64, 65, 66, 67, 34] },
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "run", "dir": false, "route": [98] },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "run", "dir": true, "route": [1] },
+		{ "event": "turn", "deg": 180, "dir": true },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2024": [
+		{ "event": "run", "dir": true, "route": [47, 62] },
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "run", "dir": false, "route": [95] },
+		// { "event": "turn", "deg": 90, "dir": true },
+		{ "event": "lift", "dir": 1 },
+		// { "event": "run", "dir": true, "route": [52] },
+		// { "event": "turn", "deg": 180, "dir": true },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [47, 52, 41, 6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	]
+};
 
 let calcErr = d3.scaleLinear().domain([0, 180]).range([180, 0]).clamp(true);
 
-let fixSpeed = [16, 38];
-let nonSafety = [];
-let runInter, offsetInter, turnInter;
+let fixSpeed = [16, 38, 10, 7, 14];
+let palletpoint = [10,7, 57, 58]
+let nonSafety = [50, 1, 26, 38];
+let runInter, offsetInter, turnInter, bufInter;
 
 let degNow = 180, sef = global.var.safety.on;
 let l = 1, step = 0;
 let lflag = true;
-let stepfile= './steps.json', stepfsbfile = './stepsfsb.json';
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.log('Unhandled Rejection at:', reason.stack || reason)
+})
 
 let clearjob = ()=>{
 	global.log('Clear Job');
@@ -33,6 +89,7 @@ let goHome = ()=>{
 	if(global.var.ar.length > 0){
 		global.log('Go Home'); 
 		global.var.ready = false;
+		global.var.to = 0;
 		turn(180, ()=>{
 			global.var.route = [6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38];
 			run(true, ()=>{
@@ -80,10 +137,13 @@ let toStandby = ()=>{
 		global.log('To Standby');
 		global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 54, 50, 51];
 		run(true, ()=>{
-			lift.process(2, ()=>{
-				// global.var.ready = true;
-				seeJob();
-			});
+			//lift.process(2, ()=>{
+				global.var.to = null;
+				global.var.buffer = null;
+				if(global.var.ready == true){
+					seeJob();
+				}
+			//});
 		});
 
 
@@ -133,6 +193,10 @@ global.io.on('connection', function(socket) {
 	socket.on('goHome',  (msgs)=> { goHome(); });
 	socket.on('toStandby',  (msgs)=> { toStandby(); });
 	socket.on('clearjob',  (msgs)=> { clearjob(); });
+	socket.on('safety',  (msgs)=> { 
+		sef = !sef;
+		global.var.safety.on = sef;
+	});
 	socket.on('seejob',  (msgs)=> { global.var.ready = true; seeJob(); });
 });
 
@@ -143,28 +207,62 @@ setInterval(()=>{
 // require('./screen');
 
 let toBuffer = (callback)=>{
-	global.var.route = [8, 13, 7, 10, 14];
-	if(global.var.buffer == null){ global.var.route = [8, 13, 7, 10, 14]; }
-	else if(global.var.buffer == 7){ global.var.route = [8, 13, 7]; }
-	else if(global.var.buffer == 10){ global.var.route = [8, 13, 7]; }
-	else if(global.var.buffer == 14){ global.var.route = [8, 13, 7, 10, 14]; }
-	
-	global.log('toBuffer ' + global.var.buffer);
-	run(false, ()=>{
-		lift.process(2, ()=>{
-			global.var.route = [7, 13, 8, 38];
-			run(true, ()=>{
-				turn(0, ()=>{
-					// global.var.route = [8];
-					// run(true, ()=>{
-						global.var.to = null;
-						global.var.buffer = null;
-						callback(); 
-					// });
-				}, true);
-			});
-		});
-	});
+	// global.var.route = [8, 13, 7, 10, 14];
+	bufInter = setInterval(()=>{
+		if(global.var.buffer != null){ 
+			clearInterval(bufInter);
+			let b = global.var.buffer ;
+			if(b == 7){ global.var.route = [8, 13, 7]; }
+			else if(b == 10){ global.var.route = [8, 13, 7, 10]; }
+			else if(b == 14){ global.var.route = [8, 13, 7, 10, 14]; }
+			if(b == 58){ global.var.route = [97, 69, 58]; }
+			else if(b == 57){ global.var.route = [97, 69, 58, 57]; }
+			else if(b == 56){ global.var.route = [97, 69, 58, 57, 56]; }
+
+
+			global.log('toBuffer ' + global.var.buffer);
+			if(b == 7 || b == 10 || b == 14){ 
+				run(false, ()=>{
+					lift.process(2, ()=>{
+						global.var.route = [13, 8, 38];
+						run(true, ()=>{
+							turn(0, ()=>{
+								global.var.buffer = null;
+								callback(); 
+							}, true, true);
+						});
+					});
+				});
+			}
+
+			if(b == 56 || b == 57 || b == 58){ 
+				global.var.route = [97, 69];
+				run(false, ()=>{
+					turn(180, ()=>{
+						if(b == 58){ global.var.route = [58]; }
+						else if(b == 57){ global.var.route = [58, 57]; }
+						else if(b == 56){ global.var.route = [58, 57, 56]; }
+						run(false, ()=>{
+							turn(180, ()=>{
+								lift.process(2, ()=>{
+									global.var.route = [69, 97, 26];
+									run(true, ()=>{
+										turn(270, ()=>{
+											global.var.buffer = null;
+											callback(); 
+										}, true);
+									});
+								});
+							}, true);
+						});
+					}, false)
+				});
+			}
+
+		}else{
+			global.log('Buffer NULL');
+		}
+	}, 1000);
 }
 
 let loop = (s)=>{
@@ -194,28 +292,14 @@ let loop = (s)=>{
 		}
 		else{
 			toBuffer(()=>{
-				if(global.var.to != null && global.var.ready){
-					steps = require(stepfile);
-					step = 0;
-					loop(steps[global.var.to]);
-					// console.dir(steps[global.var.to]);
-				}else{
+				// if(global.var.to != null && global.var.ready){
+				// 	// steps = require(stepfile);
+				// 	step = 0;
+				// 	loop(steps[global.var.to]);
+				// 	// console.dir(steps[global.var.to]);
+				// }else{
 					toStandby();
-				}
-				// request.get(
-				//     `http://192.168.101.7:3310/api/getorder`,
-				//     (err, res, body)=>{
-				//     	if(!err && res.statusCode == 200 && body && body != '' && global.var.to == null){ global.var.to = body; }
-				//     	if(global.var.to != null){
-				// 			steps = require(stepfile1);
-				// 			step = 0;
-				// 			loop(steps[global.var.to]);
-				// 			// console.dir(steps[global.var.to]);
-				// 		}else{
-				// 			toStandby();
-				// 		}
-				//     }
-				// );
+				// }
 			});
 		}
 	}
@@ -224,48 +308,18 @@ let loop = (s)=>{
 let seeJob = ()=>{
 	global.log('Standby');
 	setTimeout(()=>{
-		// if(global.var.to != null){
-		// 	steps = require('./steps.json');
-		// 	step = 0;
-		// 	global.log('To ' + global.var.to);
-		// 	loop(steps[global.var.to]);
-		// 	// console.dir(steps[global.var.to]);
-		// }else{
-		// 	seeJob();
-		// }
+		if(global.var.to == 0){
 
-		// if(global.var.to == 0){ return; }
-		if(global.var.to != null && global.var.ready){
-			steps = require(stepfsbfile);
+		}
+		else if(global.var.to != null && global.var.ready){
 			step = 0;
 			loop(steps[global.var.to]);
 			// console.dir(steps[global.var.to]);
 		}else{
 			seeJob();
 		}
-		// request.get(
-		//     `http://192.168.101.7:3310/api/getorder`,
-		//     (err, res, body)=>{
-		//     	if(!err && res.statusCode == 200 && body && body != '' && global.var.to == null){ global.var.to = body; }
-		//     	if(global.var.to != null){
-		// 			steps = require(stepfile);
-		// 			step = 0;
-		// 			loop(steps[global.var.to]);
-		// 			// console.dir(steps[global.var.to]);
-		// 		}else{
-		// 			seeJob();
-		// 		}
-		//     }
-		// );
 	}, 3000);
 }
-
-// setTimeout(()=>{
-// 	// doJob();
-
-// 	seeJob();
-	
-// },3000);
 
 var pm2 = require('pm2');
 
@@ -275,12 +329,17 @@ pm2.connect(function(err) {
     process.exit(2);
   }
   
-  pm2.start({
-    script    : 'py/ar.py',         // Script to be run
-    interpreter: 'python3'
-  }, function(err, apps) {
-    pm2.disconnect();   // Disconnects from PM2
-    if (err) throw err
+	pm2.start({
+    	script    : 'py/ar.py',         // Script to be run
+    	interpreter: 'python3'
+	}, function(err, apps) {
+  		pm2.start({
+		    script    : 'py/safety.py',         // Script to be run
+		    interpreter: 'python3'
+		  	}, function(err, apps) {
+			    pm2.disconnect();   // Disconnects from PM2
+			    if (err) throw err
+		});
   });
 });
 
@@ -290,24 +349,13 @@ let clearOrder = (t, callback)=>{
 	    `http://192.168.101.7:3310/api/clrorder/${t}`,
 	    (err, res, body)=>{
 	    	callback();
-	    	// console.dir(body);
-	    	// if(!err && res.statusCode == 200){
-	    	// 	callback();
-	    	// }else{
-	    	// 	clearOrder(t, callback);
-	    	// }
-
-	    	// if(callback){ callback(); }
-	    	// if(err && res.statusCode != 200){
-	    	// 	clearOrder(t);
-	    	// }
 	    }
 	);
 }
 
 let run = (dir = true, callback)=>{
 	global.log('Routing ' + JSON.stringify(global.var.route));
-	let ar0count = 0;
+	let ar0count = 0, lencount = 0;
 	runInter = setInterval(()=>{
 		if(global.var.route.length == 0){
 			clearInterval(runInter);
@@ -321,37 +369,47 @@ let run = (dir = true, callback)=>{
 				global.var.safety.on = sef;
 			}
 
-			global.log('Go to number ' + global.var.route[0]);
 			let a = global.var.ar.find(d => d[0] == global.var.route[0]);
 			if(a){
+				global.log('Go to number ' + global.var.route[0]);
 				if(dir){
-					if(a[6] == 'F' && a[4] > 15){
+					if(a[6] == 'F' && a[4] > 20){
 						global.var.selDeg = a[5];
 						global.var.pidval = a[5];
-						if(global.var.route.length > 1 && a[4] < 80){
+						if(global.var.route.length > 1 && a[4] < 120){
 							global.var.route.shift();
 						}
 					}else{
 						global.var.route.shift()
 					}
 				}else{
-					if(a[4] < -220){
+					if(a[4] > -220){
+						global.var.route.shift();
+					}else if(palletpoint.indexOf(global.var.route[0]) > -1 && (global.var.rds[1] < -1 || global.var.rds[0] < -1)){
+						lencount++;
+						if(lencount > 3){
+							global.log('rds = ' + global.var.rds[0] + ',' + global.var.rds[1]);
+							global.var.route = [];
+						}else{
+							global.var.selDeg = parseInt(90 + (a[3] / 3));
+							global.var.pidval = parseInt(90 + (a[3] / 3));
+						}
+					}else{
+						lencount = 0;
 						global.var.selDeg = parseInt(90 + (a[3] / 3));
 						global.var.pidval = parseInt(90 + (a[3] / 3));
-					}else{
-						global.var.route.shift()
 					} 
 				}
 				
 				if(global.var.route.length == 0){ move.stop(); }
 				else{
 					if(global.var.route.length == 1){
-						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 60 : 50), true); }
+						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 60 : 45), true); }
 						else{
 							move.run(dir, (Math.abs(a[4]) < 150) ? 30 : 50, true);
 						}
 					}else{
-						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 60 : 50), true); }
+						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 60 : 45), true); }
 						else{ move.run(dir, (dir ? 100 : 60), true); }
 					}
 				}
@@ -396,7 +454,7 @@ let offset = (no, callblack)=> {
 	}, 20);
 }
 
-let turn = (d, callblack, rd = null)=>{
+let turn = (d, callblack, rd = null, lowspd = false)=>{
 	global.log('Turning ' + d);
 	let turnFlag = true;
 	turnInter = setInterval(()=>{
@@ -410,7 +468,7 @@ let turn = (d, callblack, rd = null)=>{
 			let dir = z - calc.absDeg(currDeg);
 			let tr = 180, tl = 0;
 
-			if(Math.abs(diff) > 1){
+			if(Math.abs(diff) > (lowspd ? 5 : 1)){
 				if(dir >= 0 && turnFlag){ 
     				global.var.selDeg = tr;
 				}
@@ -422,15 +480,16 @@ let turn = (d, callblack, rd = null)=>{
 					global.var.selDeg = rd ? tr : tl;
 				}
 				
-				if((global.var.selDeg == tr && (rd == true ? global.var.currDeg < 349 : (global.var.currDeg > (tr - 5)))) || (global.var.selDeg == tl && global.var.currDeg < (tl + 5))){
+				if((global.var.selDeg == tr && (rd == true ? global.var.currDeg < 349 : (global.var.currDeg > (tr - (lowspd ? 10 : 5))))) || (global.var.selDeg == tl && global.var.currDeg < (tl + (lowspd ? 10 : 5)))){
 					turnFlag = false;
-					if(Math.abs(diff) > 40){
-						move.run(true, 75);
+					if(Math.abs(diff) > (lowspd ? 45 : 45)){
+						move.run(true, (lowspd ? 65 : 75));
 					}else{
-						move.run(true, 27);
+						move.run(true, (lowspd ? 27 : 27));
 					}
 				}
-			}else{					global.log('AR 0');
+			}else{					
+				// global.log('AR 0');
     			global.var.selDeg = 90;
     			move.stop();
 				if(global.var.currDeg < 92 || global.var.currDeg > 88){
@@ -444,6 +503,60 @@ let turn = (d, callblack, rd = null)=>{
 		}
 	}, 10);
 }
+
+
+
+// setTimeout(()=>{
+// 	global.var.buffer = 56;
+// 	if(global.var.buffer != null){ 
+// 		let b = global.var.buffer ;
+// 		if(b == 7){ global.var.route = [8, 13, 7]; }
+// 		else if(b == 10){ global.var.route = [8, 13, 7, 10]; }
+// 		else if(b == 14){ global.var.route = [8, 13, 7, 10, 14]; }
+// 		if(b == 58){ global.var.route = [97, 69, 58]; }
+// 		else if(b == 57){ global.var.route = [97, 69, 58, 57]; }
+// 		else if(b == 56){ global.var.route = [97, 69, 58, 57, 56]; }
+
+
+// 		global.log('toBuffer ' + global.var.buffer);
+// 		if(b == 7 || b == 10 || b == 14){ 
+// 			run(false, ()=>{
+// 				lift.process(2, ()=>{
+// 					global.var.route = [13, 8, 38];
+// 					run(true, ()=>{
+// 						turn(0, ()=>{
+// 							global.var.buffer = null;
+// 							// callback(); 
+// 						}, true);
+// 					});
+// 				});
+// 			});
+// 		}
+
+// 		if(b == 56 || b == 57 || b == 58){ 
+// 			global.var.route = [97, 69];
+// 			run(false, ()=>{
+// 				turn(180, ()=>{
+// 					if(b == 58){ global.var.route = [58]; }
+// 					else if(b == 57){ global.var.route = [58, 57]; }
+// 					else if(b == 56){ global.var.route = [58, 57, 56]; }
+// 					run(false, ()=>{
+// 						lift.process(2, ()=>{
+// 							global.var.route = [69, 97, 26];
+// 							run(true, ()=>{
+// 								turn(270, ()=>{
+// 									global.var.buffer = null;
+// 									// callback(); 
+// 								}, true);
+// 							});
+// 						});
+// 					});
+// 				}, false)
+// 			});
+// 		}
+
+// 	}
+// }, 3000);
 
 
 //global.var.to

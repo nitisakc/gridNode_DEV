@@ -61,6 +61,7 @@
     "pidval": 255,
     "poten": 0,
     "ready": false,
+    "batt": 0,
     "ar": [
       [
         0,
@@ -78,13 +79,11 @@
     "liftup": 0,
     "safety": {
       "on": true,
-      "l": [],
-      "r": [],
+      "c": [],
       "display": {
         "redArea": [],
         "yelArea": [],
-        "rplr": [],
-        "rpll": [],
+        "rplc": [],
         "points": []
       },
       "warning": 0,

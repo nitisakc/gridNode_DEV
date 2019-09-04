@@ -37,11 +37,11 @@
 		<div class="btn-group" role="group">
 			<button type="button" ng-click="emit('goHome',0)" class="btn btn-light">Go Home</button>
 			<button type="button" ng-click="emit('toStandby',0)" class="btn btn-light">To Stand</button>
-			<button type="button" ng-click="emit('clearjob',0)" class="btn btn-light">Clear</button>
+			<button type="button" ng-click="emit('safety',0)" ng-class="safety ? 'sel' : ''" class="btn btn-light">Safety</button>
 		</div>
 		<br><br>
 		<div class="btn-group" role="group">
-			<button type="button" ng-click="emit('seejob',0)" class="btn btn-light">See Job</button>
+			<button type="button" ng-click="emit('seejob',0)" ng-show="!var.ready" class="btn btn-light">See Job</button>
 		</div>
 		<br><br>
 		<div id="">{{var}}</div>
@@ -138,6 +138,7 @@
 				        	$scope.pidon = msg.pidon;
 				        	$scope.dir = msg.dir;
 				        	$scope.liftup = msg.liftup;
+				        	$scope.safety = msg.safety.on;
 				        	slider.setValue(msg.selSpd);
 				        	$scope.var = JSON.stringify(msg, null, 2);
 				        });

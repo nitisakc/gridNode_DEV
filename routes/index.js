@@ -9,5 +9,8 @@ router.get('/', function(req, res, next) {
 router.get('/display', function(req, res, next) {
   res.sendfile('www/display.html');
 });
+router.get('/safe', function(req, res, next) {
+  res.sendfile('www/safety.html');
+});
 
 module.exports = router;

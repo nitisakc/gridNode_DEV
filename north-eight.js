@@ -18,7 +18,7 @@ class BTS7960 {
     this.pwmr.start(pwm);
   }
 
-  lift(pwm = 255){
+  left(pwm = 255){
     this.enl.high();
     this.enr.high();
     this.pwmr.start(0);

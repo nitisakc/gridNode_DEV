@@ -21,13 +21,8 @@ app.controller('mainCtrl', function($scope, $http) {
 	        	grpl.selectAll("circle").remove();
 	        	grpl.append("circle")
 				    .attr("r", 2)
-				    .attr("cx", d.rplr[0])
-				    .attr("cy", d.rplr[1]);
-
-				grpl.append("circle")
-				    .attr("r", 2)
-				    .attr("cx", d.rpll[0])
-				    .attr("cy", d.rpll[1]);
+				    .attr("cx", d.rplc[0])
+				    .attr("cy", d.rplc[1]);
 
 				gyelarea.selectAll("polygon").remove();
 				gyelarea.selectAll("polygon")

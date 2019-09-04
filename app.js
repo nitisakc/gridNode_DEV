@@ -45,8 +45,8 @@ var server = http.createServer(app);
 server.listen(port);
 
 // global.log = (msg, type = "log")=>{
-// 	global.var.logs.unshift({ msg: msg, type: type, time: new Date() });
-// 	if(global.var.logs.length > 20) global.var.logs.pop();
+//  global.var.logs.unshift({ msg: msg, type: type, time: new Date() });
+//  if(global.var.logs.length > 20) global.var.logs.pop();
 // }
 global.logs = [];
 let old;
@@ -54,7 +54,8 @@ global.log = (msgs)=>{
   if(old != msgs){
     old = msgs;
     let dd = new Date();//dd.getHours()+''+
-    global.logs.unshift(dd.getMinutes()+'M'+dd.getSeconds()+'S:'+dd.getMilliseconds() + '|' + msgs);
+    global.logs.unshift(dd.getTime() + '|' + msgs);
+    console.log(msgs);
 
     if(global.io){ global.io.emit('logs', global.logs); }
 
@@ -67,7 +68,7 @@ global.log = (msgs)=>{
 global.io = require('socket.io').listen(server);
 
 global.pyio = require('socket.io-client')
-				.connect('http://localhost:5000/');
+        .connect('http://localhost:5000/');
 global.pyio.on('connect', () => {
   global.pyio.on('conn', function (msg) {
     global.log("pyio id: " + msg);
@@ -79,7 +80,7 @@ global.pyio.on('connect', () => {
 global.pyio.on('disconnect', function () { global.log('pyio disconnect'); });
 
 global.tcsio = require('socket.io-client')
-				.connect(args.tcshost, { query: `room=cars&number=${args.carNumber}&type=${args.carType}&port=${args.port}` });
+        .connect(args.tcshost, { query: `room=cars&number=${args.carNumber}&type=${args.carType}&port=${args.port}` });
 global.tcsio.on('connect', () => { global.lamp.w.strobe(500); });
 global.tcsio.on('disconnect', () => { global.lamp.w.stop(); global.lamp.w.off(); });
 

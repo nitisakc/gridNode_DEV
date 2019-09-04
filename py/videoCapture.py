@@ -9,12 +9,8 @@ import math
 import json
 import requests
 from utils import WebcamVideoStream
-import subprocess
 
-# cams = subprocess.check_output('ls /dev/video*', stderr=subprocess.STDOUT, shell=True)
-# cam = cams.splitlines()
-
-cap = WebcamVideoStream(src=1, width=1280, height=720).start()
+cap = WebcamVideoStream(src=0, width=1280, height=720).start()
 aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_100)
 parameters =  aruco.DetectorParameters_create()
 
@@ -30,26 +26,24 @@ def PolygonArea(c):
 	area = abs(area) / 2.0
 	return area
 
-old = ''
 while True:
 	frame = cap.read()
-	# frame = frame[0:1080, 100:1520]
-	# frame = cv2.rotate(frame, rotateCode = 0)
-	# frame = frame[0:720, 0:1280]
+
+	frame = frame[0:720, 0:1280]
 	frame = cv2.rotate(frame, rotateCode = 0)
+
 	fh, fw, _ = frame.shape
 	cx, cy = int(fw/2), int(fh/2)
-	# print(fh, fw)
 
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
 	aruco.drawDetectedMarkers(frame, corners, ids)
-
+	
 	i = 0
 	objs = []
 	for corner in corners:
 		area = PolygonArea(corner)
-		if PolygonArea(corner) > 10:
+		if area > 10:
 			xtarget = corner[0][0][0]
 			ytarget = corner[0][0][1]
 			xlast = corner[0][1][0]
@@ -79,21 +73,11 @@ while True:
 				else:
 					zone = 'R'
 				obj = [int(ids[i]), int(length), int(degree), int(x-cx), int(y-cy), int(err), zone, int(x), int(y), int(errBack) ]
-				# print(obj)
+				
 				objs.append(obj)
-
 		i = i + 1
 
-	url = str(objs)
-	if url != old:
-		old = url
-		r = requests.post('http://localhost:3001/ar/set/', json=objs)
-		# print(r)
-
-	# res = cv2.resize(frame, (int(fw/1.5), int(fh/1.5)))
-	# cv2.imshow('res',res)
-	# time.sleep(0.05)
-	# sio.emit('img', fh)
+	cv2.imshow('frame',frame)
 
 	if cv2.waitKey(1) & 0xFF == ord('q'):
 		break

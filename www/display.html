@@ -30,7 +30,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr ng-repeat="vn in varName">
+					<tr ng-repeat="vn in varName track by $index">
 						<td>{{vn}}</td>
 						<td>{{var[vn]}}</td>
 					</tr>
@@ -38,41 +38,65 @@
 			</table>
 		</div>
 		<div class="col col-9">
-			<table class="table table-dark table-bordered table-sm" style="width: 98%;">
-				<thead>
-					<tr>
-						<th ng-repeat="ah in arHead" style="width: 10%;">{{ah}}</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="ar in var.ar" ng-show="$index < 6">
-						<td ng-repeat="a in ar">{{a}}</td>
-					</tr>
-				</tbody>
-			</table>
-			<table class="table table-dark table-bordered table-sm">
-				<thead>
-					<tr>
-						<th style="width: 20%;">Time</th>
-						<th>Desc.</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="l in logs">
-						<td>{{l.split('|')[0]}}</td>
-						<td>{{l.split('|')[1]}}</td>
-					</tr>
-				</tbody>
-			</table>
+			<div class="row" style="min-height: 100%;">
+				<table class="table table-dark table-bordered table-sm col col-8" style="width: 100%;">
+					<thead>
+						<tr>
+							<th style="width: 35%;">Time</th>
+							<th>Desc.</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="l in logs track by $index" ng-show="$index < 11">
+							<td>{{l.split('|')[0] | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+							<td style="max-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{l.split('|')[1]}}</td>
+						</tr>
+					</tbody>
+				</table>
+				<svg ng-click="openModal();"  class="col col-4" style="padding: 0px 0px; width: 100%; min-height: 100%;     transform: rotate(180deg);" >
+				</svg>
+				<table class="table table-dark table-bordered table-sm col col-12">
+					<thead>
+						<tr>
+							<th ng-repeat="ah in arHead track by $index" style="width: 10%;">{{ah}}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="ar in var.ar track by $index" ng-show="$index < 6">
+							<td ng-repeat="a in ar track by $index">{{a}}</td>
+						</tr>
+					</tbody>
+				</table>
 		</div>
 		<!-- <div class="col col-3 mh-50">
 			<button type="button" ng-click="emit()" ng-class="en ? 'sel' : ''" class="btn btn-light">{{ var.ready ? 'Disable' : 'Enable' }}</button>
 		</div> -->
 	</div>
+	<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <button type="button" ng-click="emit('goHome',0)" ng-show="home" class="btn btn-light">กลับบ้าน</button>
+			<button type="button" ng-click="emit('toStandby',0)" ng-show="stand" class="btn btn-light">ไปรองาน</button>
+			<button type="button" ng-click="emit('seejob',0)" ng-show="!ready && home" class="btn btn-light">รับงาน</button>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
 	<script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap-slider.min.js"></script>
 	<script type="text/javascript" src="js/angular.min.js"></script>
+	<script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+	<script type="text/javascript" src="app/calc.js"></script>
 	<script type="text/javascript" src="js/socket.io.js" ></script>
 	<script type="text/javascript" src="js/rangeslider.min.js" ></script>
 	<script type="text/javascript" src="js/roundslider.min.js"></script>
@@ -81,9 +105,24 @@
 		app.controller('mainCtrl', function($scope, $http) {
 			$(document).ready(function() {
 				var socket = io.connect('/');
-				$scope.varName = ['en','dir', 'deg', 'currSpd', 'selSpd', 'currDeg', 'selDeg', 'poten', 'pidon', 'pidval', 'liftpos', 'liftup', 'to', 'buffer', 'ready'];
+				$scope.varName = ['en','dir', 'deg', 'currSpd', 'selSpd', 'currDeg', 'selDeg', 'poten', 'pidon', 'pidval', 'liftpos', 'liftup', 'to', 'buffer', 'ready', 'rds', 'batt'];
 
 				$scope.arHead = ['ID', 'Len', 'Deg', 'XL', 'YL', 'Err', 'Zone', 'X', 'Y', 'bErr'];
+				$scope.home = false;
+				$scope.stand = false;
+
+				$scope.openModal = ()=>{
+					$('#modal').modal('show');
+				}
+
+				let svg = d3.select("svg"),
+					gridSize = 10;
+
+				let grpl = svg.append("g").attr('class','rpl');
+				let gyelarea = svg.append("g").attr('class','yelarea');
+				let gredarea = svg.append("g").attr('class','redarea');
+				let gline = svg.append("g").attr('class','grid');
+				let gobj = svg.append("g").attr('class','obj');
   
 			    if(socket){
 			        socket.on('conn', function (msg) {
@@ -93,6 +132,17 @@
 			        socket.on('var', function (msg) {
 			        	$scope.$apply(()=>{
 			        		$scope.var = msg;
+			        		$scope.ready = msg.ready;
+
+			        		let a = $scope.var.ar.find(d => d[0] == 51);
+			        		if(a && a[1] < 100 && $scope.var.to == null && ($scope.var.deg > 340 || $scope.var < 20)){
+				        		$scope.home = true;
+				        	}else{ $scope.home = false; }
+
+				        	a = $scope.var.ar.find(d => d[0] == 25);
+			        		if(a && $scope.var.to == null && ($scope.var.deg > 300 || $scope.var < 45)){
+				        		$scope.stand = true;
+				        	}else{ $scope.stand = false; }
 				        });
 			        });
 			        socket.on('logs', function (msg) {
@@ -103,9 +153,49 @@
 
 			        $scope.emit = (name, val)=>{
 			        	socket.emit(name, val);
+						$('#modal').modal('hide');
 			        }
+
+			        socket.on('safety', function (d) {
+			        	$scope.$apply(function(){ $scope.safety = d; });
+			        	grpl.selectAll("circle").remove();
+			        	grpl.append("circle")
+						    .attr("r", 2)
+						    .attr("cx", d.rplc[0])
+						    .attr("cy", d.rplc[1]);
+
+						gyelarea.selectAll("polygon").remove();
+						gyelarea.selectAll("polygon")
+						    	.data([d.yelArea])
+						    .enter().append("polygon")
+								.attr("fill-opacity","1")
+						    	.attr("fill", '#e8f000')
+								.attr('stroke', '#e8f000')
+								.attr('stroke-width', '0')
+						    	.attr("points", d=> d);
+
+						gredarea.selectAll("polygon").remove();
+						gredarea.selectAll("polygon")
+						    	.data([d.redArea])
+						    .enter().append("polygon")
+								.attr("fill-opacity","1")
+						    	.attr("fill", '#f19901')
+								.attr('stroke', '#f19901')
+								.attr('stroke-width', '0')
+						    	.attr("points", d=> d);
+
+						gobj.selectAll("circle").remove();
+						gobj.selectAll("circle")
+						    	.data(d.points)
+							.enter().append("circle")
+							    .attr("r", 1)
+							    .attr("fill", c=> c[3] ? '#f20202' : (c[2] ? '#f19901' : '#0c9302'))
+							    .attr("cx", c=> c[0])
+							    .attr("cy", c=> c[1]);
+			        });
 			    }
 			});
+			// $scope.socketInit();
 		});
 	</script>
 </body>

@@ -4,8 +4,6 @@ import datetime
 from threading import Thread
 import subprocess
 import time
-# import logging
-# import platform
 
 class WebcamVideoStream:
     def __init__(self, src, width, height, sleep=0.0):
@@ -23,7 +21,7 @@ class WebcamVideoStream:
 
         (self.grabbed, self.frame) = self.stream.read()
         # self.frame = cv2.resize(frame, (self.width, self.height))
-
+        
         self.stopped = False
 
     def start(self):
