@@ -17,31 +17,31 @@
 	<input id="speed" data-slider-id='exSpeed' type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0" data-slider-orientation="vertical"/>
 	<div id="dir">
 		<div class="">
-			<button type="button" ng-click="emit('en',!en)" ng-class="en ? 'sel' : ''" class="btn btn-light">Enable</button>
-			<button type="button" ng-click="emit('beep',!beep)" ng-class="beep ? 'sel' : ''" class="btn btn-light">Beep</button>
+			<button type="button" ng-click="emit('en',!en)" ng-class="en ? 'sel' : ''" class="btn btn-light">เดิน</button>
+			<button type="button" ng-click="emit('beep',!beep)" ng-class="beep ? 'sel' : ''" class="btn btn-light">แตร</button>
 			<button type="button" ng-click="emit('pidon',!pidon)" ng-class="pidon ? 'sel' : ''" class="btn btn-light">PID</button>
 		</div>
 		<br>
 		<div class="btn-group" role="group">
-			<button type="button" ng-click="emit('dir',0)" ng-class="dir == 0 ? 'sel' : ''" class="btn btn-light">None</button>
-			<button type="button" ng-click="emit('dir',1)" ng-class="dir == 1 ? 'sel' : ''" class="btn btn-light">Forward</button>
-			<button type="button" ng-click="emit('dir',2)" ng-class="dir == 2 ? 'sel' : ''" class="btn btn-light">Backward</button>
+			<button type="button" ng-click="emit('dir',0)" ng-class="dir == 0 ? 'sel' : ''" class="btn btn-light">หยุด</button>
+			<button type="button" ng-click="emit('dir',1)" ng-class="dir == 1 ? 'sel' : ''" class="btn btn-light">เดินหน้า</button>
+			<button type="button" ng-click="emit('dir',2)" ng-class="dir == 2 ? 'sel' : ''" class="btn btn-light">ถอยหลัง</button>
 		</div>
 		<br><br>
 		<div class="btn-group" role="group">
-			<button type="button" ng-click="emit('liftup',0)" ng-class="liftup == 0 ? 'sel' : ''" class="btn btn-light">Stop</button>
-			<button type="button" ng-click="emit('liftup',1)" ng-class="liftup == 1 ? 'sel' : ''" class="btn btn-light">Lift Up</button>
-			<button type="button" ng-click="emit('liftup',2)" ng-class="liftup == 2 ? 'sel' : ''" class="btn btn-light">Lift Down</button>
+			<button type="button" ng-click="emit('liftup',0)" ng-class="liftup == 0 ? 'sel' : ''" class="btn btn-light">ลิฟหยุด</button>
+			<button type="button" ng-click="emit('liftup',1)" ng-class="liftup == 1 ? 'sel' : ''" class="btn btn-light">ลิฟขึ้น</button>
+			<button type="button" ng-click="emit('liftup',2)" ng-class="liftup == 2 ? 'sel' : ''" class="btn btn-light">ลิฟลง</button>
 		</div>
 		<br><br>
 		<div class="btn-group" role="group">
-			<button type="button" ng-click="emit('goHome',0)" class="btn btn-light">Go Home</button>
-			<button type="button" ng-click="emit('toStandby',0)" class="btn btn-light">To Stand</button>
+			<button type="button" ng-click="emit('goHome',0)" class="btn btn-light">กลับบ้าน</button>
+			<button type="button" ng-click="emit('toStandby',0)" class="btn btn-light">ไปรองาน</button>
 			<button type="button" ng-click="emit('safety',0)" ng-class="safety ? 'sel' : ''" class="btn btn-light">Safety</button>
 		</div>
 		<br><br>
 		<div class="btn-group" role="group">
-			<button type="button" ng-click="emit('seejob',0)" ng-show="!var.ready" class="btn btn-light">See Job</button>
+			<button type="button" ng-click="emit('seejob',0)" ng-show="!ready" class="btn btn-light">รับงาน</button>
 		</div>
 		<br><br>
 		<div id="">{{var}}</div>
@@ -139,6 +139,7 @@
 				        	$scope.dir = msg.dir;
 				        	$scope.liftup = msg.liftup;
 				        	$scope.safety = msg.safety.on;
+				        	$scope.ready = msg.ready;
 				        	slider.setValue(msg.selSpd);
 				        	$scope.var = JSON.stringify(msg, null, 2);
 				        });

@@ -10,11 +10,11 @@ let stepfile = require('./steps.json');
 let stepfsbfile = require('./stepsfsb.json');
 let steps = {
 	"M2025": [
-		{ "event": "run", "dir": false, "route": [55, 54] },
+		{ "event": "run", "dir": false, "route": [50, 54] },
 		{ "event": "turn", "deg": 90, "dir": true },
-		{ "event": "run", "dir": false, "route": [96] },
+		{ "event": "run", "dir": false, "route": [96], "osl": -210 },
 		{ "event": "lift", "dir": 1 },
-		{ "event": "run", "dir": true, "route": [54] },
+		{ "event": "run", "dir": true, "route": [54], "osl": -220 },
 		{ "event": "clearorder" },
 		{ "event": "run", "dir": true, "route": [40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
 	],
@@ -22,24 +22,24 @@ let steps = {
 		{ "event": "turn", "deg": 90, "dir": true },
 		{ "event": "run", "dir": true, "route": [88, 3] },
 		{ "event": "turn", "deg": 270, "dir": true },
-		{ "event": "run", "dir": false, "route": [72] },
+		{ "event": "run", "dir": false, "route": [72], "osl": -160 },
 		{ "event": "lift", "dir": 1 },
 		{ "event": "clearorder" },
 		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
 	],
 	"M2030": [
 		{ "event": "turn", "deg": 180, "dir": true },
-		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 16] },
+		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 16], "osl": 70 },
 		{ "event": "turn", "deg": 270, "dir": true },
-		{ "event": "run", "dir": false, "route": [30] },
+		{ "event": "run", "dir": false, "route": [30], "osl": -180 },
 		{ "event": "lift", "dir": 1 },
 		{ "event": "clearorder" },
 		{ "event": "run", "dir": true, "route": [16, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
 	],
 	"M2029": [
-		{ "event": "run", "dir": true, "route": [47, 62, 63, 64, 65, 66, 67, 34] },
+		{ "event": "run", "dir": true, "route": [47, 62, 63, 64, 65, 66, 67, 55], "osl": 95 },
 		{ "event": "turn", "deg": 90, "dir": true },
-		{ "event": "run", "dir": false, "route": [98] },
+		{ "event": "run", "dir": false, "route": [98], "osl": -190 },
 		{ "event": "lift", "dir": 1 },
 		{ "event": "run", "dir": true, "route": [1] },
 		{ "event": "turn", "deg": 180, "dir": true },
@@ -47,9 +47,9 @@ let steps = {
 		{ "event": "run", "dir": true, "route": [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
 	],
 	"M2024": [
-		{ "event": "run", "dir": true, "route": [47, 62] },
+		{ "event": "run", "dir": true, "route": [47, 62], "osl": 50 },
 		{ "event": "turn", "deg": 90, "dir": true },
-		{ "event": "run", "dir": false, "route": [95] },
+		{ "event": "run", "dir": false, "route": [95], "osl": -180 },
 		// { "event": "turn", "deg": 90, "dir": true },
 		{ "event": "lift", "dir": 1 },
 		// { "event": "run", "dir": true, "route": [52] },
@@ -62,11 +62,11 @@ let steps = {
 let calcErr = d3.scaleLinear().domain([0, 180]).range([180, 0]).clamp(true);
 
 let fixSpeed = [16, 38, 10, 7, 14];
-let palletpoint = [10,7, 57, 58]
+let palletpoint = [10,7, 57, 58];
 let nonSafety = [50, 1, 26, 38];
 let runInter, offsetInter, turnInter, bufInter;
 
-let degNow = 180, sef = global.var.safety.on;
+let degNow = 180, sef = global.var.safety.on, backoffset = 210;
 let l = 1, step = 0;
 let lflag = true;
 
@@ -219,6 +219,9 @@ let toBuffer = (callback)=>{
 			else if(b == 57){ global.var.route = [97, 69, 58, 57]; }
 			else if(b == 56){ global.var.route = [97, 69, 58, 57, 56]; }
 
+			if(global.var.liftpos != 1){
+				lift.process(1, ()=>{});
+			}
 
 			global.log('toBuffer ' + global.var.buffer);
 			if(b == 7 || b == 10 || b == 14){ 
@@ -232,7 +235,7 @@ let toBuffer = (callback)=>{
 							}, true, true);
 						});
 					});
-				});
+				}, -165);
 			}
 
 			if(b == 56 || b == 57 || b == 58){ 
@@ -243,7 +246,7 @@ let toBuffer = (callback)=>{
 						else if(b == 57){ global.var.route = [58, 57]; }
 						else if(b == 56){ global.var.route = [58, 57, 56]; }
 						run(false, ()=>{
-							turn(180, ()=>{
+							// turn(180, ()=>{
 								lift.process(2, ()=>{
 									global.var.route = [69, 97, 26];
 									run(true, ()=>{
@@ -253,7 +256,7 @@ let toBuffer = (callback)=>{
 										}, true);
 									});
 								});
-							}, true);
+							// }, true);
 						});
 					}, false)
 				});
@@ -273,7 +276,11 @@ let loop = (s)=>{
 
 			if(s[inx].event == 'run'){
 				global.var.route = JSON.parse(JSON.stringify(s[inx].route));
-				run(s[inx].dir, ()=>{ step++; loop(s); });
+				if(s[inx].osl){
+					run(s[inx].dir, ()=>{ step++; loop(s); }, s[inx].osl);
+				}else{
+					run(s[inx].dir, ()=>{ step++; loop(s); });	
+				}
 			}else if(s[inx].event == 'turn'){
 				turn(s[inx].deg, ()=>{ step++; loop(s); }, s[inx].dir);
 			}else if(s[inx].event == 'lift'){
@@ -306,6 +313,7 @@ let loop = (s)=>{
 }
 
 let seeJob = ()=>{
+	// falseRun();
 	global.log('Standby');
 	setTimeout(()=>{
 		if(global.var.to == 0){
@@ -328,10 +336,10 @@ pm2.connect(function(err) {
     console.error(err);
     process.exit(2);
   }
-  
 	pm2.start({
     	script    : 'py/ar.py',         // Script to be run
-    	interpreter: 'python3'
+    	interpreter: 'python3',
+    	args: ['--back', backoffset]
 	}, function(err, apps) {
   		pm2.start({
 		    script    : 'py/safety.py',         // Script to be run
@@ -353,7 +361,7 @@ let clearOrder = (t, callback)=>{
 	);
 }
 
-let run = (dir = true, callback)=>{
+let run = (dir = true, callback, osl = 30)=>{
 	global.log('Routing ' + JSON.stringify(global.var.route));
 	let ar0count = 0, lencount = 0;
 	runInter = setInterval(()=>{
@@ -373,17 +381,26 @@ let run = (dir = true, callback)=>{
 			if(a){
 				global.log('Go to number ' + global.var.route[0]);
 				if(dir){
-					if(a[6] == 'F' && a[4] > 20){
+					if(a[6] == 'F' && a[4] > osl){
 						global.var.selDeg = a[5];
 						global.var.pidval = a[5];
-						if(global.var.route.length > 1 && a[4] < 120){
+						if(global.var.route.length > 1 && a[4] < 140){
 							global.var.route.shift();
 						}
 					}else{
 						global.var.route.shift()
 					}
 				}else{
-					if(a[4] > -220){
+					let bs = (osl != 30 ? osl : (backoffset * -1));
+					// let pp = [14, 10, 7, 72];
+					// let pp180 = [95, 96, 30];
+					// let pp160 = [72];
+					// let pp220 = [54];
+					// // if(pp.indexOf(global.var.route[0]) > -1){ bs = -190; }
+					// if(pp180.indexOf(global.var.route[0]) > -1){ bs = -180; }
+					// else if(pp160.indexOf(global.var.route[0]) > -1){ bs = -160; }
+					// else if(pp220.indexOf(global.var.route[0]) > -1){ bs = -220; }
+					if(a[4] > bs){
 						global.var.route.shift();
 					}else if(palletpoint.indexOf(global.var.route[0]) > -1 && (global.var.rds[1] < -1 || global.var.rds[0] < -1)){
 						lencount++;
@@ -391,26 +408,32 @@ let run = (dir = true, callback)=>{
 							global.log('rds = ' + global.var.rds[0] + ',' + global.var.rds[1]);
 							global.var.route = [];
 						}else{
-							global.var.selDeg = parseInt(90 + (a[3] / 3));
-							global.var.pidval = parseInt(90 + (a[3] / 3));
+							global.var.selDeg = parseInt(90 + (a[3] / 1));
+							global.var.pidval = parseInt(90 + (a[3] / 1));
+							// global.var.selDeg = parseInt(90 + (90 - a[9]));
+							// global.var.pidval = parseInt(90 + (90 - a[9]));
+							// global.var.selDeg = parseInt(a[9]);
+							// global.var.pidval = parseInt(a[9]);
 						}
 					}else{
 						lencount = 0;
-						global.var.selDeg = parseInt(90 + (a[3] / 3));
-						global.var.pidval = parseInt(90 + (a[3] / 3));
+						global.var.selDeg = parseInt(90 + (a[3] / 1));
+						global.var.pidval = parseInt(90 + (a[3] / 1));
+						// global.var.selDeg = parseInt(a[9]);
+						// global.var.pidval = parseInt(a[9]);
 					} 
 				}
 				
 				if(global.var.route.length == 0){ move.stop(); }
 				else{
 					if(global.var.route.length == 1){
-						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 60 : 45), true); }
+						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 50 : 35), true); }
 						else{
-							move.run(dir, (Math.abs(a[4]) < 150) ? 30 : 50, true);
+							move.run(dir, (Math.abs(a[4]) < 180) ? 30 : 35, true);
 						}
 					}else{
-						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 60 : 45), true); }
-						else{ move.run(dir, (dir ? 100 : 60), true); }
+						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 50 : 35), true); }
+						else{ move.run(dir, (dir ? 100 : 50), true); }
 					}
 				}
 				ar0count = 0;
@@ -504,6 +527,26 @@ let turn = (d, callblack, rd = null, lowspd = false)=>{
 	}, 10);
 }
 
+let trueRun = ()=>{
+	global.var.route = [13, 8, 38]; 
+	run(true, ()=>{
+		func.wait(2000, ()=>{
+			falseRun();
+		});
+	});
+}
+let falseRun = ()=>{
+	global.var.route = [8, 13, 7, 10, 14]; 
+	run(false, ()=>{
+		func.wait(2000, ()=>{
+			trueRun();
+		});
+	});
+}
+
+// setTimeout(()=>{
+// 	falseRun();
+// }, 3000);
 
 
 // setTimeout(()=>{

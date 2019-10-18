@@ -135,12 +135,12 @@
 			        		$scope.ready = msg.ready;
 
 			        		let a = $scope.var.ar.find(d => d[0] == 51);
-			        		if(a && a[1] < 100 && $scope.var.to == null && ($scope.var.deg > 340 || $scope.var < 20)){
+			        		if(a && a[1] < 100 && $scope.var.to == null && ($scope.var.deg > 340 || $scope.var.deg < 20)){
 				        		$scope.home = true;
 				        	}else{ $scope.home = false; }
 
 				        	a = $scope.var.ar.find(d => d[0] == 25);
-			        		if(a && $scope.var.to == null && ($scope.var.deg > 300 || $scope.var < 45)){
+			        		if(a && $scope.var.to == null && ($scope.var.deg > 300 || $scope.var.deg < 45)){
 				        		$scope.stand = true;
 				        	}else{ $scope.stand = false; }
 				        });

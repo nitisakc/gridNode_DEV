@@ -7,11 +7,12 @@ const SerialPort = require('serialport');
 // const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
 const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
 
-let calcPoten = d3.scaleLinear().domain([860, 190]).range([0, 180]).clamp(true);
-let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-22, 22]).clamp(true);
+let calcPoten = d3.scaleLinear().domain([850, 170]).range([0, 180]).clamp(true);
+let calcDiffBack = d3.scaleLinear().domain([-90, 90]).range([-40, 40]).clamp(true);
+let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-30, 30]).clamp(true);
 let calcSpeed = d3.scaleLinear().domain([0, 100]).range([0, 255]).clamp(true);
 let calcVolt = d3.scaleLinear().domain([0, 1024]).range([0, 5]).clamp(true);
-let calcBatt = d3.scaleLinear().domain([0, 512]).range([0, 100]).clamp(true);
+let calcBatt = d3.scaleLinear().domain([0, 1024]).range([0, 24]).clamp(true);
 
 let relay, poten, reset, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds, batt, safetyLast = false;
 
@@ -73,7 +74,7 @@ board.on("ready", ()=> {
   // });
 
   batt.on("data", function() {
-    global.var.batt = this.value;//calcBatt(this.value).toFixed(0);
+    global.var.batt = calcBatt(this.value).toFixed(2);
   });
 
   poten.on("data", function() {
@@ -82,11 +83,11 @@ board.on("ready", ()=> {
     let sdeg = global.var.pidon ? global.var.pidval : global.var.selDeg;
     let diff = sdeg - global.var.currDeg;
     global.var.diffDeg = (diff).toFixed(0);//calcDiff(diff).toFixed(0);
-    let d = calcDiff(diff).toFixed(0);
+    let d = global.var.dir == 2 ? calcDiffBack(diff).toFixed(0) : calcDiff(diff).toFixed(0);
     if(d < -1){
-      trunMotor.left(230);
+      trunMotor.left(255);
     }else if(d > 1){
-      trunMotor.right(230);
+      trunMotor.right(255);
     }else{
       trunMotor.stop();
     }
