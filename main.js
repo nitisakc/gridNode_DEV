@@ -4,6 +4,8 @@ const calc = require('./utils/calc');
 const func = require('./utils/func');
 const { board, relay, lamp, move, lift, other } = require('./arduino');
 const syss = require('./syss');
+const wifi = require("node-wifi");
+
 // let steps = require('./steps.json');
 const request = require('request');
 let stepfile = require('./steps.json');
@@ -61,14 +63,18 @@ let steps = {
 
 let calcErr = d3.scaleLinear().domain([0, 180]).range([180, 0]).clamp(true);
 
-let fixSpeed = [16, 38, 10, 7, 14];
+let fixSpeed = [16, 38, 10, 7, 14, 100, 107];
 let palletpoint = [10,7, 57, 58];
 let nonSafety = [50, 1, 26, 38];
-let runInter, offsetInter, turnInter, bufInter;
+let runInter, offsetInter, turnInter, bufInter, wifiInter, blockInter, clrblockInter;
 
 let degNow = 180, sef = global.var.safety.on, backoffset = 210;
 let l = 1, step = 0;
 let lflag = true;
+
+wifi.init({
+  iface: null
+});
 
 process.on('unhandledRejection', (reason, promise) => {
   console.log('Unhandled Rejection at:', reason.stack || reason)
@@ -206,6 +212,32 @@ setInterval(()=>{
 
 // require('./screen');
 
+let connect = (ssid, callblack = null)=>{
+	wifiInter = setInterval(()=>{
+		wifi.getCurrentConnections(function(err, currCon) {
+		  	if (err) { console.log(err); return; }
+		  	if(currCon && currCon[0].ssid != ssid){
+		  		global.log('Connecting ' + ssid +'...');
+			  	wifi.connect({ ssid: ssid }, function(err) {
+				  	if (err) {
+				    	console.log(err);
+				  	}else{
+						clearInterval(wifiInter);
+						global.log('Connected ' + ssid);
+						if(callblack){ callblack(); }
+					}
+				});
+		  	}else{
+				clearInterval(wifiInter);
+				global.log('Connected ' + ssid);
+				if(callblack){ callblack(); }
+		 	 }
+		   
+		});
+
+	}, 5000);
+}
+
 let toBuffer = (callback)=>{
 	// global.var.route = [8, 13, 7, 10, 14];
 	bufInter = setInterval(()=>{
@@ -294,6 +326,16 @@ let loop = (s)=>{
 					step++;
 					loop(s);
 				});
+			}else if(s[inx].event == 'connect'){
+				connect(s[inx].ssid, ()=>{
+					step++;
+					loop(s);
+				});
+			}else if(s[inx].event == 'block'){
+				block(s[inx].zone, ()=>{
+					step++;
+					loop(s);
+				});
 			}
 			
 		}
@@ -315,6 +357,7 @@ let loop = (s)=>{
 let seeJob = ()=>{
 	// falseRun();
 	global.log('Standby');
+
 	setTimeout(()=>{
 		if(global.var.to == 0){
 
@@ -326,6 +369,21 @@ let seeJob = ()=>{
 		}else{
 			seeJob();
 		}
+
+		// global.var.route = [68, 94, 93, 92, 87, 91, 90, 86, 89 ,85, 84, 116, 117, 112];
+		// global.var.route = [89 ,85, 84, 109, 116, 117, 112];
+		// global.var.route = [43, 36, 45 ,5, 100, 107, 111];
+		// run(true, ()=>{
+		// 	global.var.route = [117, 115];
+		// 	run(false, ()=>{
+		// 		turn(0, ()=>{ 
+		// 			global.var.route = [119, 113, 114, 104, 103];
+		// 			run(false, ()=>{
+		// 				global.log('end'); 
+		// 			}, -230);
+		// 		}, true, true);
+		// 	}, -160);
+		// });
 	}, 3000);
 }
 
@@ -350,6 +408,40 @@ pm2.connect(function(err) {
 		});
   });
 });
+
+let clrblock = (z, callback)=>{
+	clrblockInter = setInterval(()=>{
+		global.log('Get Block ' + z);
+		request({
+		    method: 'GET',
+		    url: `http://192.168.101.7:3310/api/clrblock/${global.var.number}/${z}`,
+		    timeout: 1500
+		}, (err, res, body)=>{
+	    	if(res && res.statusCode == 200){
+	    		clearInterval(clrblockInter);
+				global.log('Block ' + z);
+				if(callblack){ callblack(); }
+	    	}
+		});
+	}, 2500);
+}
+
+let block = (z, callback)=>{
+	blockInter = setInterval(()=>{
+		global.log('Get Block ' + z);
+		request({
+		    method: 'GET',
+		    url: `http://192.168.101.7:3310/api/block/${global.var.number}/${z}`,
+		    timeout: 1500
+		}, (err, res, body)=>{
+	    	if(res && res.statusCode == 200){
+	    		clearInterval(blockInter);
+				global.log('Block ' + z);
+				if(callblack){ callblack(); }
+	    	}
+		});
+	}, 2500);
+}
 
 let clearOrder = (t, callback)=>{
 	// callback();
@@ -385,9 +477,11 @@ let run = (dir = true, callback, osl = 30)=>{
 						global.var.selDeg = a[5];
 						global.var.pidval = a[5];
 						if(global.var.route.length > 1 && a[4] < 140){
+	    					global.io.emit('currpos', global.var.route[0]);
 							global.var.route.shift();
 						}
 					}else{
+	    				global.io.emit('currpos', global.var.route[0]);
 						global.var.route.shift()
 					}
 				}else{
@@ -401,6 +495,7 @@ let run = (dir = true, callback, osl = 30)=>{
 					// else if(pp160.indexOf(global.var.route[0]) > -1){ bs = -160; }
 					// else if(pp220.indexOf(global.var.route[0]) > -1){ bs = -220; }
 					if(a[4] > bs){
+	    				global.io.emit('currpos', global.var.route[0]);
 						global.var.route.shift();
 					}else if(palletpoint.indexOf(global.var.route[0]) > -1 && (global.var.rds[1] < -1 || global.var.rds[0] < -1)){
 						lencount++;
