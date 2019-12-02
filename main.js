@@ -5,70 +5,68 @@ const func = require('./utils/func');
 const { board, relay, lamp, move, lift, other } = require('./arduino');
 const syss = require('./syss');
 const wifi = require("node-wifi");
-
-// let steps = require('./steps.json');
 const request = require('request');
-let stepfile = require('./steps.json');
-let stepfsbfile = require('./stepsfsb.json');
-let steps = {
-	"M2025": [
-		{ "event": "run", "dir": false, "route": [50, 54] },
-		{ "event": "turn", "deg": 90, "dir": true },
-		{ "event": "run", "dir": false, "route": [96], "osl": -210 },
-		{ "event": "lift", "dir": 1 },
-		{ "event": "run", "dir": true, "route": [54], "osl": -220 },
-		{ "event": "clearorder" },
-		{ "event": "run", "dir": true, "route": [40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
-	],
-	"M2027": [
-		{ "event": "turn", "deg": 90, "dir": true },
-		{ "event": "run", "dir": true, "route": [88, 3] },
-		{ "event": "turn", "deg": 270, "dir": true },
-		{ "event": "run", "dir": false, "route": [72], "osl": -160 },
-		{ "event": "lift", "dir": 1 },
-		{ "event": "clearorder" },
-		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
-	],
-	"M2030": [
-		{ "event": "turn", "deg": 180, "dir": true },
-		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 16], "osl": 70 },
-		{ "event": "turn", "deg": 270, "dir": true },
-		{ "event": "run", "dir": false, "route": [30], "osl": -180 },
-		{ "event": "lift", "dir": 1 },
-		{ "event": "clearorder" },
-		{ "event": "run", "dir": true, "route": [16, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
-	],
-	"M2029": [
-		{ "event": "run", "dir": true, "route": [47, 62, 63, 64, 65, 66, 67, 55], "osl": 95 },
-		{ "event": "turn", "deg": 90, "dir": true },
-		{ "event": "run", "dir": false, "route": [98], "osl": -190 },
-		{ "event": "lift", "dir": 1 },
-		{ "event": "run", "dir": true, "route": [1] },
-		{ "event": "turn", "deg": 180, "dir": true },
-		{ "event": "clearorder" },
-		{ "event": "run", "dir": true, "route": [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
-	],
-	"M2024": [
-		{ "event": "run", "dir": true, "route": [47, 62], "osl": 50 },
-		{ "event": "turn", "deg": 90, "dir": true },
-		{ "event": "run", "dir": false, "route": [95], "osl": -180 },
-		// { "event": "turn", "deg": 90, "dir": true },
-		{ "event": "lift", "dir": 1 },
-		// { "event": "run", "dir": true, "route": [52] },
-		// { "event": "turn", "deg": 180, "dir": true },
-		{ "event": "clearorder" },
-		{ "event": "run", "dir": true, "route": [47, 52, 41, 6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
-	]
-};
+let conf = require('./config/main.json');
+let steps = require('./config/steps.json');
+// {
+// 	"M2025": [
+// 		{ "event": "run", "dir": false, "route": [50, 54] },
+// 		{ "event": "turn", "deg": 90, "dir": true },
+// 		{ "event": "run", "dir": false, "route": [96], "osl": -210 },
+// 		{ "event": "lift", "dir": 1 },
+// 		{ "event": "run", "dir": true, "route": [54], "osl": -220 },
+// 		{ "event": "clearorder" },
+// 		{ "event": "run", "dir": true, "route": [40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+// 	],
+// 	"M2027": [
+// 		{ "event": "turn", "deg": 90, "dir": true },
+// 		{ "event": "run", "dir": true, "route": [88, 3] },
+// 		{ "event": "turn", "deg": 270, "dir": true },
+// 		{ "event": "run", "dir": false, "route": [72], "osl": -160 },
+// 		{ "event": "lift", "dir": 1 },
+// 		{ "event": "clearorder" },
+// 		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+// 	],
+// 	"M2030": [
+// 		{ "event": "turn", "deg": 180, "dir": true },
+// 		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 16], "osl": 70 },
+// 		{ "event": "turn", "deg": 270, "dir": true },
+// 		{ "event": "run", "dir": false, "route": [30], "osl": -180 },
+// 		{ "event": "lift", "dir": 1 },
+// 		{ "event": "clearorder" },
+// 		{ "event": "run", "dir": true, "route": [16, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+// 	],
+// 	"M2029": [
+// 		{ "event": "run", "dir": true, "route": [47, 62, 63, 64, 65, 66, 67, 55], "osl": 95 },
+// 		{ "event": "turn", "deg": 90, "dir": true },
+// 		{ "event": "run", "dir": false, "route": [98], "osl": -190 },
+// 		{ "event": "lift", "dir": 1 },
+// 		{ "event": "run", "dir": true, "route": [1] },
+// 		{ "event": "turn", "deg": 180, "dir": true },
+// 		{ "event": "clearorder" },
+// 		{ "event": "run", "dir": true, "route": [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+// 	],
+// 	"M2024": [
+// 		{ "event": "run", "dir": true, "route": [47, 62], "osl": 50 },
+// 		{ "event": "turn", "deg": 90, "dir": true },
+// 		{ "event": "run", "dir": false, "route": [95], "osl": -180 },
+// 		// { "event": "turn", "deg": 90, "dir": true },
+// 		{ "event": "lift", "dir": 1 },
+// 		// { "event": "run", "dir": true, "route": [52] },
+// 		// { "event": "turn", "deg": 180, "dir": true },
+// 		{ "event": "clearorder" },
+// 		{ "event": "run", "dir": true, "route": [47, 52, 41, 6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+// 	]
+// };
 
 let calcErr = d3.scaleLinear().domain([0, 180]).range([180, 0]).clamp(true);
 
-let fixSpeed = [16, 38, 10, 7, 14, 100, 107];
-let palletpoint = [10,7, 57, 58];
-let nonSafety = [50, 1, 26, 38];
+let fixSpeed = conf.fixSpeed;
+let palletpoint = conf.palletpoint;
+let nonSafety = conf.nonSafety;
 let runInter, offsetInter, turnInter, bufInter, wifiInter, blockInter, clrblockInter;
 
-let degNow = 180, sef = global.var.safety.on, backoffset = 210;
+let degNow = 180, sef = global.var.safety.on, backoffset = conf.backoffset;
 let l = 1, step = 0;
 let lflag = true;
 
@@ -267,7 +265,7 @@ let toBuffer = (callback)=>{
 							}, true, true);
 						});
 					});
-				}, -165);
+				}, conf.bufferosl);
 			}
 
 			if(b == 56 || b == 57 || b == 58){ 
@@ -289,7 +287,7 @@ let toBuffer = (callback)=>{
 									});
 								});
 							// }, true);
-						});
+						}, conf.bufferosl);
 					}, false)
 				});
 			}
@@ -357,6 +355,15 @@ let loop = (s)=>{
 let seeJob = ()=>{
 	// falseRun();
 	global.log('Standby');
+	request({
+	    method: 'GET',
+	    url: `http://192.168.101.7:3310/api/waitjob/${global.var.number}`,
+	    timeout: 1000
+	}, (err, res, body)=>{
+		if(err){
+			global.log('Send waitjob error.');
+		}
+	});
 
 	setTimeout(()=>{
 		if(global.var.to == 0){
@@ -394,19 +401,19 @@ pm2.connect(function(err) {
     console.error(err);
     process.exit(2);
   }
-	pm2.start({
-    	script    : 'py/ar.py',         // Script to be run
-    	interpreter: 'python3',
-    	args: ['--back', backoffset]
-	}, function(err, apps) {
-  		pm2.start({
-		    script    : 'py/safety.py',         // Script to be run
-		    interpreter: 'python3'
-		  	}, function(err, apps) {
+	// pm2.start({
+ //    	script    : 'py/ar.py',         // Script to be run
+ //    	interpreter: 'python3',
+ //    	args: ['--back', backoffset]
+	// }, function(err, apps) {
+ //  		pm2.start({
+	// 	    script    : 'py/safety.py',         // Script to be run
+	// 	    interpreter: 'python3'
+	// 	  	}, function(err, apps) {
 			    pm2.disconnect();   // Disconnects from PM2
 			    if (err) throw err
-		});
-  });
+		// });
+  // });
 });
 
 let clrblock = (z, callback)=>{
@@ -453,7 +460,7 @@ let clearOrder = (t, callback)=>{
 	);
 }
 
-let run = (dir = true, callback, osl = 30)=>{
+let run = (dir = true, callback, osl = conf.oslRun)=>{
 	global.log('Routing ' + JSON.stringify(global.var.route));
 	let ar0count = 0, lencount = 0;
 	runInter = setInterval(()=>{
@@ -476,7 +483,7 @@ let run = (dir = true, callback, osl = 30)=>{
 					if(a[6] == 'F' && a[4] > osl){
 						global.var.selDeg = a[5];
 						global.var.pidval = a[5];
-						if(global.var.route.length > 1 && a[4] < 140){
+						if(global.var.route.length > 1 && a[4] < conf.nextoffset){
 	    					global.io.emit('currpos', global.var.route[0]);
 							global.var.route.shift();
 						}
@@ -485,7 +492,7 @@ let run = (dir = true, callback, osl = 30)=>{
 						global.var.route.shift()
 					}
 				}else{
-					let bs = (osl != 30 ? osl : (backoffset * -1));
+					let bs = (osl != conf.oslRun ? osl : (backoffset * -1));
 					// let pp = [14, 10, 7, 72];
 					// let pp180 = [95, 96, 30];
 					// let pp160 = [72];
@@ -522,22 +529,22 @@ let run = (dir = true, callback, osl = 30)=>{
 				if(global.var.route.length == 0){ move.stop(); }
 				else{
 					if(global.var.route.length == 1){
-						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 50 : 35), true); }
+						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? conf.fixSpeed[0] : conf.fixSpeed[1]), true); }
 						else{
-							move.run(dir, (Math.abs(a[4]) < 180) ? 30 : 35, true);
+							move.run(dir, (Math.abs(a[4]) < conf.last.len) ? conf.last.spd[0] : conf.last.spd[1], true);
 						}
 					}else{
-						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? 50 : 35), true); }
-						else{ move.run(dir, (dir ? 100 : 50), true); }
+						if(fixSpeed.indexOf(global.var.route[0]) > -1){ move.run(dir, (dir ? conf.fixSpeed[0] : conf.fixSpeed[1]), true); }
+						else{ move.run(dir, (dir ? conf.runspd[0] : conf.runspd[1]), true); }
 					}
 				}
 				ar0count = 0;
 			}else{
-				if(ar0count > 250){
+				if(ar0count > conf.ar0count){
 					move.stop();
 					global.log('AR 0');
 				}else{
-					move.run(dir, (dir ? 60 : 40), false);
+					move.run(dir, (dir ? conf.ar0spd[0] : conf.ar0spd[1]), false);
 					ar0count = ar0count + 1;
 				}
 			}
@@ -600,10 +607,10 @@ let turn = (d, callblack, rd = null, lowspd = false)=>{
 				
 				if((global.var.selDeg == tr && (rd == true ? global.var.currDeg < 349 : (global.var.currDeg > (tr - (lowspd ? 10 : 5))))) || (global.var.selDeg == tl && global.var.currDeg < (tl + (lowspd ? 10 : 5)))){
 					turnFlag = false;
-					if(Math.abs(diff) > (lowspd ? 45 : 45)){
-						move.run(true, (lowspd ? 65 : 75));
+					if(Math.abs(diff) > (lowspd ? conf.turnDeg[0] : conf.turnDeg[1])){
+						move.run(true, (lowspd ? conf.turnspd[0] : conf.turnspd[1]));
 					}else{
-						move.run(true, (lowspd ? 27 : 27));
+						move.run(true, (lowspd ? conf.turnspdrdu[0] : conf.turnspdrdu[1]));
 					}
 				}
 			}else{					

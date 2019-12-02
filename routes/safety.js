@@ -73,14 +73,18 @@ let calc = ()=>{
 		if(point[3]){ d++; }
 		global.var.safety.display.points.push(point);
 	}
-	global.var.safety.warning = w;
-	global.var.safety.danger = d;
+	if(global.var.safety.warning != w || global.var.safety.danger != d){ 
+		global.var.safety.warning = w; 
+		global.var.safety.danger = d;
 
-	if(global.io) global.io.emit('safety', global.var.safety.display);
+		if(global.io) global.io.emit('safety', [w, d]);
+	}
+
+	if(global.io) global.io.emit('display', global.var.safety.display);
 
 	setTimeout(()=>{
 		calc();
-	},150);
+	},40);
 }
 
 let addPoint = (raw, off = 0)=>{

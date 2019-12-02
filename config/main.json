@@ -1,0 +1,20 @@
+{
+	"fixSpeed" : [16, 38, 10, 7, 14, 100, 107],
+	"palletpoint" : [10,7, 57, 58],
+	"nonSafety" : [50, 1, 26, 38],
+	"backoffset": 210,
+	"oslRun": 30,
+	"nextoffset": 140,
+	"fixSpeed": [50, 35],
+	"last": {
+		"len": 180,
+		"spd": [30, 35]
+	},
+	"runspd": [100, 50],
+	"ar0count": 250,
+	"ar0spd": [60,40],
+	"turnDeg": [45, 45],
+	"turnspd": [65, 75],
+	"turnspdrdu": [27, 27],
+	"bufferosl": -165
+}

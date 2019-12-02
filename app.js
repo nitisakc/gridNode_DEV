@@ -5,10 +5,11 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const http = require('http');
 const pjson = require('./package.json');
+const loadvar = require('./config/var.json');
 
 global.arcount = 0;
 global.syss = pjson.syss;
-global.var = pjson.var;
+global.var = loadvar;//pjson.var;
 
 var ArgumentParser = require('argparse').ArgumentParser;
 var parser = new ArgumentParser();

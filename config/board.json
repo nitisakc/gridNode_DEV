@@ -1,0 +1,42 @@
+{
+	"relay" : {
+	    "enable": 22,
+	    "forward": 23,
+	    "backward": 24,
+	    "liftup": 26,
+	    "liftdown": 27,
+	    "brake": 28,
+      "beep": 39
+  },
+  "lamp" : {
+    "r" : 34 ,
+    "o" : 35 ,
+    "g" : 36 ,
+    "b" : 37 ,
+    "w" : 38 
+  },
+  "beeps" : {
+    "a" : 9 ,
+    "b" : 10
+  },
+  "spd": 4,
+  "trun": [45, 47, 44, 46],
+  "batt" : "A8",
+  "poten" : { "pin" : "A5", "freq" : 120 }, 
+  "reset" : 8, 
+  "liftPosUp" : 5, 
+  "liftPosDown" : 6, 
+  "rds" : ["A4", "A7"],
+  "potenCalc" : {
+  	"raw" : [850, 170],
+  	"bw" : 40,
+  	"fw" : 30
+  },
+  "speedReduce" : {
+  	"warning" : 3,
+  	"danger" : 2 ,
+	  "ratio": 1.8,
+	  "min": 30,
+	  "deg": 50
+	}
+}

@@ -1,14 +1,18 @@
-import math
-#Y = y - hh
-#X = x - hw
-# degree = math.atan2(-112, 60)  #Y, X
-# degree = math.degrees(degree)
+import socketio
 
-degrees = 352.06 - 90
-length = 663.5
+sio = socketio.Client()
 
-# print(math.sin(49))
-# print(12 * math.sin(90-41))
-print(int(length * math.sin(math.radians(degrees)))) #y
-print(int(length * math.cos(math.radians(degrees)))) #x
+@sio.on('connect')
+def on_connect():
+    print('connection established')
 
+@sio.on('my message')
+def on_message(data):
+    print('message received with ', data)
+    sio.emit('my response', {'response': 'my response'})
+
+@sio.on('disconnect')
+def on_disconnect():
+    print('disconnected from server')
+
+sio.connect('http://localhost:3001')

@@ -13,4 +13,8 @@ router.get('/safe', function(req, res, next) {
   res.sendfile('www/safety.html');
 });
 
+router.get('/online', function(req, res, next) {
+  res.send('online');
+});
+
 module.exports = router;

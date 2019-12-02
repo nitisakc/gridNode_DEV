@@ -37,6 +37,7 @@ def PolygonArea(c):
 	return area
 
 old = ''
+delay = 0
 while True:
 	frame = cap.read()
 	# frame = frame[0:1080, 100:1520]
@@ -95,10 +96,13 @@ while True:
 		i = i + 1
 
 	url = str(objs)
-	if url != old:
+	if url != old and delay > 10:
+		delay = 0
 		old = url
 		r = requests.post('http://localhost:3001/ar/set/', json=objs)
 		# print(r)
+
+	delay = delay + 1
 
 	# res = cv2.resize(frame, (int(fw/1.5), int(fh/1.5)))
 	# cv2.imshow('res',res)

@@ -1,0 +1,51 @@
+{
+  "number": 43,
+  "en": false,
+  "dir": 0,
+  "currSpd": 0,
+  "selSpd": 0,
+  "currDeg": 255,
+  "selDeg": 90,
+  "diffDeg": 0,
+  "pidon": false,
+  "pidval": 255,
+  "poten": 0,
+  "ready": false,
+  "batt": 0,
+  "ar": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "liftpos": 0,
+  "liftup": 0,
+  "safety": {
+    "on": true,
+    "c": [],
+    "display": {
+      "redArea": [],
+      "yelArea": [],
+      "rplc": [],
+      "points": []
+    },
+    "warning": 0,
+    "danger": 0
+  },
+  "pallet": 0,
+  "beep": false,
+  "rds": [
+    255,
+    255
+  ],
+  "route": [],
+  "to": null,
+  "buffer": null
+}

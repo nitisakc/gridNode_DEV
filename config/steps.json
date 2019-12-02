@@ -1,0 +1,47 @@
+{
+	"M2025": [
+		{ "event": "run", "dir": false, "route": [50, 54] },
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "run", "dir": false, "route": [96], "osl": -210 },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "run", "dir": true, "route": [54], "osl": -220 },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2027": [
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "run", "dir": true, "route": [88, 3] },
+		{ "event": "turn", "deg": 270, "dir": true },
+		{ "event": "run", "dir": false, "route": [72], "osl": -160 },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2030": [
+		{ "event": "turn", "deg": 180, "dir": true },
+		{ "event": "run", "dir": true, "route": [6, 40, 31, 42, 39, 16], "osl": 70 },
+		{ "event": "turn", "deg": 270, "dir": true },
+		{ "event": "run", "dir": false, "route": [30], "osl": -180 },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [16, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2029": [
+		{ "event": "run", "dir": true, "route": [47, 62, 63, 64, 65, 66, 67, 55], "osl": 103 },
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "run", "dir": false, "route": [98], "osl": -190 },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "run", "dir": true, "route": [1] },
+		{ "event": "turn", "deg": 180, "dir": true },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [67, 66, 65, 64, 63, 62, 47, 41, 6 ,40, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	],
+	"M2024": [
+		{ "event": "run", "dir": true, "route": [47, 62], "osl": 50 },
+		{ "event": "turn", "deg": 90, "dir": true },
+		{ "event": "run", "dir": false, "route": [95], "osl": -180 },
+		{ "event": "lift", "dir": 1 },
+		{ "event": "clearorder" },
+		{ "event": "run", "dir": true, "route": [108, 52, 41, 6, 40, 31, 42, 39, 4, 49, 5, 45, 36, 43, 37, 21, 24, 35, 23, 12, 33, 25, 26, 38] }
+	]
+}

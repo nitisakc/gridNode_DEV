@@ -3,71 +3,78 @@ const d3 = require("d3-scale");
 const calc = require('./utils/calc');
 const eight = require("./north-eight.js");
 const SerialPort = require('serialport');
-const config = require('./config/board.json');
 
 // const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
 const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
 
-let calcPoten = d3.scaleLinear().domain([config.potenCalc.raw[0], config.potenCalc.raw[1]]).range([0, 180]).clamp(true);
-let calcDiffBack = d3.scaleLinear().domain([-90, 90]).range([config.potenCalc.bw * -1, config.potenCalc.bw]).clamp(true);
-let calcDiff = d3.scaleLinear().domain([-90, 90]).range([config.potenCalc.fw * -1, config.potenCalc.fw]).clamp(true);
+let calcPoten = d3.scaleLinear().domain([850, 170]).range([0, 180]).clamp(true);
+let calcDiffBack = d3.scaleLinear().domain([-90, 90]).range([-40, 40]).clamp(true);
+let calcDiff = d3.scaleLinear().domain([-90, 90]).range([-30, 30]).clamp(true);
 let calcSpeed = d3.scaleLinear().domain([0, 100]).range([0, 255]).clamp(true);
 let calcVolt = d3.scaleLinear().domain([0, 1024]).range([0, 5]).clamp(true);
 let calcBatt = d3.scaleLinear().domain([0, 1024]).range([0, 24]).clamp(true);
 
 let relay, poten, reset, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds, batt, safetyLast = false;
-let vchk = false, schk = false;
 
 board.on("ready", ()=> {
   global.log('Board ready.');
   relay = {
-    enable: new eight.Relay({ pin: config.relay.enable, type: 'LOW' }),
-    forward: new eight.Relay({ pin: config.relay.forward, type: 'LOW' }),
-    backward: new eight.Relay({ pin: config.relay.backward, type: 'LOW' }),
-    liftup: new eight.Relay({ pin: config.relay.liftup, type: 'LOW' }),
-    liftdown: new eight.Relay({ pin: config.relay.liftdown, type: 'LOW' }),
-    brake: new eight.Relay({ pin: config.relay.brake, type: 'LOW' }),
-    beep: new eight.Relay({ pin: config.relay.beep, type: 'LOW' })
+    enable: new eight.Relay({ pin: 22, type: 'LOW' }),
+    forward: new eight.Relay({ pin: 23, type: 'LOW' }),
+    backward: new eight.Relay({ pin: 24, type: 'LOW' }),
+    beep: new eight.Relay({ pin: 25, type: 'LOW' }),
+    liftup: new eight.Relay({ pin: 26, type: 'LOW' }),
+    liftdown: new eight.Relay({ pin: 27, type: 'LOW' }),
+    brake: new eight.Relay({ pin: 28, type: 'LOW' }),
+    safety: new eight.Relay({ pin: 29, type: 'LOW' })
   };
+
 
   // relay.safety.on(); 
 
   global.lamp = lamp = {
-    r: new five.Led({ pin: config.lamp.r }),
-    o: new five.Led({ pin: config.lamp.o }),
-    g: new five.Led({ pin: config.lamp.g }),
-    b: new five.Led({ pin: config.lamp.b }),
-    w: new five.Led({ pin: config.lamp.w })
+    r: new five.Led({ pin: 34 }),
+    o: new five.Led({ pin: 35 }),
+    g: new five.Led({ pin: 36 }),
+    b: new five.Led({ pin: 37 }),
+    w: new five.Led({ pin: 38 })
   };
 
-  motors        = new five.Motor(config.spd);
+  motors        = new five.Motor(4);
 
   let beeps = {
-    a: new five.Led({ pin: config.beeps.a }),
-    b: new five.Led({ pin: config.beeps.b })
+    a: new five.Led({ pin: 9 }),
+    b: new five.Led({ pin: 10 })
   }
   beeps.a.blink(500);
   
-  trunMotor     = new eight.BTS7960(config.trun[0], config.trun[1], config.trun[2], config.trun[3]); //use en 45 only
-  batt          = new five.Sensor({ pin: config.batt, freq: 10 });
-  poten         = new five.Sensor({ pin: config.poten.pin, freq: config.poten.freq });
-  reset         = new five.Button({ pin: config.reset, isPullup: true });
-  liftPosUp     = new five.Button({ pin: config.liftPosUp, isPullup: true });
-  liftPosDown   = new five.Button({ pin: config.liftPosDown, isPullup: true });
-  rds = [ new five.Proximity({ controller: "GP2Y0A41SK0F", pin: config.rds[0] }),
-          new five.Proximity({ controller: "GP2Y0A41SK0F", pin: config.rds[1] }) ];
+  trunMotor     = new eight.BTS7960(45, 47, 44, 46); //use en 45 only
+  batt          = new five.Sensor({ pin: "A8", freq: 10 });
+  poten         = new five.Sensor({ pin: "A5", freq: 120 });
+  liftp         = new five.Sensor({ pin: "A6", freq: 120 });
+  reset         = new five.Button({ pin: 8, isPullup: true });
+  liftPosUp     = new five.Button({ pin: 5, isPullup: true });
+  liftPosDown   = new five.Button({ pin: 6, isPullup: true });
+  rds = [ new five.Proximity({ controller: "GP2Y0A41SK0F", pin: "A4" }),
+          new five.Proximity({ controller: "GP2Y0A41SK0F", pin: "A7" }) ];
 
   rds[0].on("data", function() { global.var.rds[0] = parseInt((global.var.rds[0] + this.cm) / 2); });
   rds[1].on("data", function() { global.var.rds[1] = parseInt((global.var.rds[1] + this.cm) / 2); });
 
+  // liftp.on("data", function() {
+  //   // console.dir(calcVolt(this.value)); 
+  //   if(calcVolt(this.value) > 4){
+  //     global.var.liftpos = 2; 
+  //   } else if(calcVolt(this.value) < 1.5){
+  //     global.var.liftpos = 1; 
+  //   }else{
+  //     global.var.liftpos = 0; 
+  //   }
+  //   // global.var.liftpos = calcVolt(this.value);
+  // });
+
   batt.on("data", function() {
     global.var.batt = calcBatt(this.value).toFixed(2);
-    if(global.var.batt < 5 && vchk){
-      vchk = false;
-      global.log('Voltage drops');
-    }else{
-      vchk = true;
-    }
   });
 
   poten.on("data", function() {
@@ -88,7 +95,6 @@ board.on("ready", ()=> {
 
   reset.on("press",  ()=> { 
     // console.log("reset press");
-    global.log('Reset press');
     global.var.en = false;
     global.var.dir = 0; 
     relay.enable.off(); 
@@ -124,6 +130,24 @@ board.on("ready", ()=> {
     if(global.var.selSpd > 0 && global.var.en == true && global.var.dir != 0){ beeps.b.off(); }
     else{ beeps.b.on(); }
 
+    // if(global.var.safety.on && global.var.safety.danger > 2 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
+    //   relay.safety.on(); 
+    //   move.stop();
+    //   global.var.selSpd = 0;
+    //   safetyLast = true;
+
+    //   if(lampStatus.safety == false){ other.beep(); lampStatus.safetyStart(); }  
+      
+      
+    // }else if(global.var.safety.on){
+    //   if(safetyLast){
+    //     setTimeout(()=>{
+    //       relay.safety.off(); 
+    //       lampStatus.safetyStop();
+    //     }, 2000)
+    //   }
+    //   safetyLast = false;
+    // }
     move.accel();
 
     if(lampStatus.safety == false){
@@ -197,7 +221,11 @@ let move = {
   run: (fw, spd, pid = false)=>{
     move.pid(pid); 
     move.dir(fw);
+    // if(global.var.safety.on && global.var.safety.danger > 0){
+    //   move.stop();
+    // }else{
     move.en();
+    // }
     move.speed(spd);
   },
   pid: (onoff = true)=>{
@@ -240,19 +268,13 @@ let move = {
     global.var.dir = 0;
   },
   speed: (val)=>{
-    if(global.var.safety.on && global.var.safety.warning > config.speedReduce.warning && global.var.en == true && global.var.dir == 1 && (global.var.selDeg < (config.speedReduce.deg + 90) && global.var.selDeg > (config.speedReduce.deg - 90))){
-      val = parseInt(val / config.speedReduce.ratio);
-      val = val < config.speedReduce.min ? config.speedReduce.min : val;
+    if(global.var.safety.on && global.var.safety.warning > 3 && global.var.en == true && global.var.dir == 1 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
+      val = parseInt(val / 1.8);
+      val = val < 30 ? 30 : val;
     }
 
-    if(global.var.safety.on && global.var.safety.danger > config.speedReduce.danger && global.var.en == true && global.var.dir == 1 && (global.var.selDeg < (config.speedReduce.deg + 90) && global.var.selDeg > (config.speedReduce.deg - 90))){
+    if(global.var.safety.on && global.var.safety.danger > 2 && global.var.en == true && global.var.dir == 1 && (global.var.selDeg < 140 && global.var.selDeg > 40)){
       val = 0;
-      if(schk){
-        schk = false;
-        global.log('Safety on');
-      }else{
-        schk = true;
-      }
     }
 
     global.var.selSpd = val;
@@ -297,7 +319,6 @@ let lift = {
     relay.liftup.on();
     let inv = setInterval(()=>{
       if(global.var.liftpos == 1){
-        global.log('Lift up');
         clearInterval(inv);
         lift.stop();
         if(callback){ callback(); }
@@ -313,7 +334,6 @@ let lift = {
       if(global.var.liftpos == 2){
         co++;
         if(co > 5){
-          global.log('Lift down');
           co = 0;
           clearInterval(inv);
           lift.stop();
