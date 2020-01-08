@@ -81,6 +81,10 @@
 	        </button>
 	      </div>
 	      <div class="modal-body">
+			<button type="button" ng-click="emit('liftup',0)" class="btn btn-light">หยุดลิฟ</button>
+			<button type="button" ng-click="emit('liftup',1)" class="btn btn-light">ลิฟขึ้น</button>
+			<button type="button" ng-click="emit('liftup',2)" class="btn btn-light">ลิฟลง</button>
+			<br><br>
 	        <button type="button" ng-click="emit('goHome',0)" ng-show="home" class="btn btn-light">กลับบ้าน</button>
 			<button type="button" ng-click="emit('toStandby',0)" ng-show="stand" class="btn btn-light">ไปรองาน</button>
 			<button type="button" ng-click="emit('seejob',0)" ng-show="!ready && home" class="btn btn-light">รับงาน</button>
@@ -111,6 +115,10 @@
 				$scope.home = false;
 				$scope.stand = false;
 
+				// $scope.sortAr = function(ar) {
+				//     return card.values.opt1 + card.values.opt2;
+				// };
+
 				$scope.openModal = ()=>{
 					$('#modal').modal('show');
 				}
@@ -131,11 +139,12 @@
 
 			        socket.on('var', function (msg) {
 			        	$scope.$apply(()=>{
+							// msg.ar.sort((a,b) => { return (a[1] > b[1]) });
 			        		$scope.var = msg;
 			        		$scope.ready = msg.ready;
 
 			        		let a = $scope.var.ar.find(d => d[0] == 51);
-			        		if(a && a[1] < 100 && $scope.var.to == null && ($scope.var.deg > 340 || $scope.var.deg < 20)){
+			        		if(a && a[1] < 50 && $scope.var.to == null && ($scope.var.deg > 350 || $scope.var.deg < 10)){
 				        		$scope.home = true;
 				        	}else{ $scope.home = false; }
 

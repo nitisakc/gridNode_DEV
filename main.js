@@ -452,9 +452,11 @@ let block = (z, callback)=>{
 
 let clearOrder = (t, callback)=>{
 	// callback();
+    lamp.b.on();
 	request.get(
 	    `http://192.168.101.7:3310/api/clrorder/${t}`,
 	    (err, res, body)=>{
+    		lamp.b.off();
 	    	callback();
 	    }
 	);

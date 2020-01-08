@@ -3,9 +3,9 @@
 	    "enable": 22,
 	    "forward": 23,
 	    "backward": 24,
-	    "liftup": 26,
-	    "liftdown": 27,
-	    "brake": 28,
+	    "liftup": 25,
+	    "liftdown": 26,
+	    "brake": 27,
       "beep": 39
   },
   "lamp" : {

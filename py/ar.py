@@ -20,7 +20,7 @@ parser.add_argument('-b', '--back', dest='back', type=int, default=200)
 args = parser.parse_args()
 back = args.back
 
-cap = WebcamVideoStream(src=0, width=1280, height=720).start()
+cap = WebcamVideoStream(src=1, width=1280, height=720).start()
 aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_250)
 parameters =  aruco.DetectorParameters_create()
 
@@ -46,12 +46,12 @@ while True:
 	frame = cv2.rotate(frame, rotateCode = 0)
 	fh, fw, _ = frame.shape
 	# print(fh, fw)
-	print(back)
+	# print(back)
 	cx, cy = int(fw/2), int(fh/2)
 
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
-	# aruco.drawDetectedMarkers(frame, corners, ids)
+	aruco.drawDetectedMarkers(frame, corners, ids)
 
 	cv2.line(frame, (int(cx), 0), (int(cx), int(fh)), (255, 0, 255), 2, 1)
 	cv2.line(frame, (0, int(cy)), (int(fw), int(cy)), (255, 0, 255), 2, 1)
@@ -99,13 +99,13 @@ while True:
 	if url != old and delay > 10:
 		delay = 0
 		old = url
-		r = requests.post('http://localhost:3001/ar/set/', json=objs)
+		# r = requests.post('http://localhost:3001/ar/set/', json=objs)
 		# print(r)
 
 	delay = delay + 1
 
-	# res = cv2.resize(frame, (int(fw/1.5), int(fh/1.5)))
-	# cv2.imshow('res',res)
+	res = cv2.resize(frame, (int(fw/1.5), int(fh/1.5)))
+	cv2.imshow('res',res)
 	# time.sleep(0.05)
 	# sio.emit('img', fh)
 

@@ -5,8 +5,8 @@ const eight = require("./north-eight.js");
 const SerialPort = require('serialport');
 const config = require('./config/board.json');
 
-// const board = new five.Board({ repl: false, debug: true, port: "/dev/tty.usbmodem1411" });
-const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
+const board = new five.Board({ repl: false, debug: true, port: "/dev/cu.wchusbserial1410" });
+// const board = new five.Board({ repl: false, debug: true, port: "/dev/ttyACM0" });
 
 let calcPoten = d3.scaleLinear().domain([config.potenCalc.raw[0], config.potenCalc.raw[1]]).range([0, 180]).clamp(true);
 let calcDiffBack = d3.scaleLinear().domain([-90, 90]).range([config.potenCalc.bw * -1, config.potenCalc.bw]).clamp(true);
@@ -19,6 +19,22 @@ let relay, poten, reset, liftPosUp, liftPosDown, motors, lamp, trunMotor, rds, b
 let vchk = false, schk = false;
 
 board.on("ready", ()=> {
+  // const compass = new five.Compass({
+  //   controller: "MAG3110"
+  // });
+
+  // compass.on("change", () => {
+  //   const {bearing, heading, raw} = compass;
+  //   console.log(bearing);
+  //   console.log(heading);
+  //   console.log(raw);
+  //   console.log(Math.atan2(raw.y, raw.x) * (180 / Math.PI));
+  //   // console.log("Compass:");
+  //   // console.log("  bearing     : ", bearing);
+  //   // console.log("  heading     : ", heading);
+  //   // console.log("--------------------------------------");
+  // });
+
   global.log('Board ready.');
   relay = {
     enable: new eight.Relay({ pin: config.relay.enable, type: 'LOW' }),

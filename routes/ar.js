@@ -13,7 +13,7 @@ router.post('/set', function(req, res, next) {
 		global.var.ar.sort((a,b) => (a[1] > b[1]));
 	}
 
-	res.send(200);
+	res.sendStatus(200);
 });
 
 module.exports = router;
