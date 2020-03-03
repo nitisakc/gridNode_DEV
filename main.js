@@ -86,41 +86,31 @@ let goHome = ()=>{
 	}
 }
 
+let toWaitZone = ()=>{
+	if(global.var.ar.length > 0){
+		global.log('To Standby');
+		global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4];
+		run(true, ()=>{
+			global.var.to = null;
+			global.var.buffer = null;
+			waitZone();
+		});
+	}
+}
+
 let toStandby = ()=>{
 	if(global.var.ar.length > 0){
 		global.log('To Standby');
-		global.var.route = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 54, 50, 51];
-		run(true, ()=>{
-			//lift.process(2, ()=>{
+		global.var.route = [39, 42, 40, 54, 50, 51];
+		turn(0, ()=>{
+			run(true, ()=>{
 				global.var.to = null;
 				global.var.buffer = null;
 				if(global.var.ready == true){
 					seeJob();
 				}
-			//});
-		});
-
-
-	// let currDeg = global.var.ar[0][2];
-		// if(currDeg > 315 && currDeg < 45){
-		// 	let r = [25, 33, 12, 23, 35, 24, 21, 37, 43, 36, 45 ,5, 49, 4, 39, 42, 40, 27, 50, 51];
-		// 	for(i = 0; i < r.length; i++){
-		// 		let a = global.var.ar.find(d => d[0] == r[i] && d[6] == 'F' && d[4] > 50);
-		// 		if(a){
-		// 			i = 9999;
-		// 			r.splice(0,i+1);
-		// 			global.var.route = r;
-		// 			global.log(r);
-		// 			run(true, ()=>{
-		// 				lift.process(2, ()=>{
-		// 					stepfile = stepfile2;
-		// 					seeJob();
-		// 				});
-		// 			});
-		// 		}
-		// 	}
-			
-		// }
+			});
+		}, false);
 	}
 }
 
@@ -300,6 +290,18 @@ let loop = (s)=>{
 			});
 		}
 	}
+}
+
+let waitZone = ()=>{
+	// falseRun();
+	global.log('WaitZone');
+	setTimeout(()=>{
+		if(global.zone[0] == null){
+			toStandby();
+		}else{
+			waitZone();
+		}
+	}, 3000);
 }
 
 let seeJob = ()=>{
